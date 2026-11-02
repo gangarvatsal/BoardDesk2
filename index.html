@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>BoardDesk</title>
+<style>
+:root{--bg:#f1f3f7;--panel:#fff;--ink:#1b2236;--mute:#5d6882;--line:#d6dbe6;--accent:#1f4fd8;--ai:#fff;--field:#f7f8fb;--hl:#fff1b8;
+--sans:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10131c;--panel:#181c28;--ink:#e6e9f2;--mute:#9aa4bd;--line:#2a3042;--accent:#7b9bff;--ai:#0c1226;--field:#1f2434;--hl:#5a4b10;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10131c;--panel:#181c28;--ink:#e6e9f2;--mute:#9aa4bd;--line:#2a3042;--accent:#7b9bff;--ai:#0c1226;--field:#1f2434;--hl:#5a4b10;color-scheme:dark}
+*{box-sizing:border-box}html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.5 var(--sans)}
+header{max-width:1320px;margin:auto;padding:16px 20px 4px}h1{margin:0;font-size:24px}header p{margin:4px 0 0;color:var(--mute)}
+footer.site{max-width:1320px;margin:0 auto;padding:0 20px 28px;color:var(--mute);font-size:14px}footer.site .card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:12px 16px}footer.site a{color:var(--accent)}
+@media print{footer.site{display:none}}
+main{display:grid;grid-template-columns:minmax(0,460px) minmax(0,1fr);gap:18px;max-width:1320px;margin:auto;padding:12px 20px 40px;align-items:start}
+@media(max-width:920px){main{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px}
+fieldset{border:0;margin:0 0 16px;padding:0}legend{font-weight:600;font-size:16px;margin-bottom:6px;padding:0}
+label{display:block;font-size:13px;color:var(--mute);margin:8px 0 3px}label.ck{display:flex;gap:8px;align-items:center;color:var(--ink);margin:8px 0}label.ck input{width:auto}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--field);border:1px solid var(--line);border-radius:6px;padding:7px 9px}
+textarea{resize:vertical;min-height:62px}input:focus,select:focus,textarea:focus,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+button{font:inherit;cursor:pointer;border:1px solid var(--line);background:var(--panel);color:var(--ink);border-radius:6px;padding:7px 12px}
+button.p{background:var(--accent);color:var(--ai);border-color:var(--accent);font-weight:600}
+.item{border:1px solid var(--line);border-radius:8px;padding:10px;margin-bottom:10px;background:var(--field)}
+.item input,.item textarea,.item select{background:var(--panel)}.item textarea{min-height:90px}
+.bar{display:flex;gap:6px;margin-top:8px;justify-content:flex-end}.bar button{padding:3px 9px;font-size:13px}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:12px;align-items:center}.grow{flex:1}
+.hint{font-size:13px;color:var(--mute);margin:6px 0 0}
+.wrap{overflow-x:auto}
+.sheet{background:#fff;color:#000;font:15px/1.5 "Times New Roman",Times,serif;padding:56px 64px;border:1px solid var(--line);border-radius:3px;min-width:320px}
+.sheet p{margin:0 0 10px;text-align:justify;white-space:pre-wrap}.sheet .h{font-weight:700;text-align:justify}
+.sheet .t{font-weight:700;margin:16px 0 8px}.sheet .rn{margin:10px 0 4px}
+.sheet table{border-collapse:collapse;margin:0 0 10px;width:100%}.sheet td{padding:2px 6px 2px 0;vertical-align:top}.sheet td:first-child{width:34%}.sheet td:nth-child(2){width:14px}
+.sheet table.g td,.sheet table.g th{border:1px solid #000;padding:3px 6px}
+.sheet mark{background:var(--hl);color:inherit}
+.sheet img.lh{display:block;max-width:none;width:calc(100% + 128px);margin:-56px -64px 22px}.sheet img.lhf{display:block;max-width:none;width:calc(100% + 128px);margin:28px -64px -56px}
+.sheet .lhn{font:12px/1.4 var(--sans);color:#555;border:1px dashed #aaa;padding:6px 8px;margin:-30px -30px 20px;text-align:left;word-break:break-word}
+@media(max-width:600px){.sheet img.lh{width:calc(100% + 36px);margin:-24px -18px 16px}.sheet img.lhf{width:calc(100% + 36px);margin:20px -18px -24px}}
+#ntpl{font:13px/1.45 ui-monospace,Menlo,Consolas,monospace;min-height:340px}.hint code{font-size:12px}
+.sig{margin-top:18px}
+.sheet .ru{font-weight:700;text-decoration:underline;margin:0 0 6px}.sheet .sp{min-height:1.5em;margin:0}.sheet .h{border-bottom:2px solid #000;padding-bottom:4px}
+.ax{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.ax input[type=file]{flex:1;min-width:0}#ctcs{width:auto}button.warn{color:#b42318;border-color:#e4a7a0}
+details.item>summary{cursor:pointer;font-weight:600;list-style-position:outside}.tag{font-size:11px;border:1px solid var(--line);border-radius:10px;padding:0 7px;color:var(--mute);margin-left:8px;font-weight:400}
+.prow{display:grid;grid-template-columns:1fr 1fr;gap:0 10px}.prow label{margin-top:4px}#ptabs button{font-size:13px;padding:5px 10px}#ctcb{font-size:13px;gap:10px}#ctcb label.ck{margin:0}.sheet{position:relative}
+.sheet .ct{text-align:center;font-weight:700}.sheet .l{text-align:left}.sheet .pb{border-top:1px dashed #999;margin:22px 0;padding:0}.sheet.att{font-size:13px}.sheet a{color:#0563c1}
+.tools button.on{border-color:var(--accent);box-shadow:inset 0 -3px 0 var(--accent);font-weight:600}
+.sheet table.g td,.sheet table.g th{width:auto!important;text-align:left}.sheet table.g th{font-weight:700}
+#chk{font-size:14px;padding:10px 14px;margin-bottom:12px}#chk ul{margin:6px 0 0;padding-left:20px}
+@media(max-width:600px){.sheet{padding:24px 18px}}
+@media print{body{background:#fff}header,.form,.tools,.hint{display:none!important}main{display:block;padding:0}.sheet{border:0;padding:0}.sheet mark{background:none}.sheet .lhn{display:none}}
+</style></head><body>
+<header><h1>BoardDesk</h1><p>Notices, agendas, minutes, CTCs and attendance registers for Board, committee, EGM and AGM meetings. Fill the left side; the minutes build on the right.</p></header>
+<main>
+<section class="panel form">
+<fieldset><legend>Meeting</legend>
+<label for="ent">Saved entities</label><div class="row"><select id="ent"></select><div style="display:flex;gap:6px"><button id="entsave">Save this entity</button><button id="entdel">Delete</button></div></div>
+<button id="next" style="margin:8px 0 4px">Start next meeting from this one</button>
+<div class="row"><div><label for="k">Type</label><select id="k" data-k="k"><option value="board">Board meeting</option><option value="com">Committee meeting</option><option value="egm">Extra ordinary general meeting</option><option value="agm">Annual general meeting</option></select></div>
+<div><label for="no">Number (e.g. 3RD)</label><input id="no" data-k="no"></div></div>
+<div id="cnw"><label for="cn">Committee name</label><input id="cn" data-k="cn" placeholder="Audit Committee"></div>
+<label for="co">Company</label><input id="co" data-k="co">
+<label for="addr">Registered office address</label><textarea id="addr" data-k="addr" style="min-height:48px"></textarea>
+<div class="row"><div><label for="fy">Financial year</label><input id="fy" data-k="fy" placeholder="2026 – 2027"></div><div><label for="date">Date</label><input id="date" type="date" data-k="date"></div></div>
+<div class="row"><div><label for="start">Commenced</label><input id="start" type="time" data-k="start"></div><div><label for="end">Concluded</label><input id="end" type="time" data-k="end"></div></div>
+<label for="mode">Mode</label><select id="mode" data-k="mode"><option value="vc">Video conferencing (VC / OAVM)</option><option value="hyb">Hybrid (venue and VC)</option><option value="phy">Physical</option></select>
+<label for="vt">Venue</label><select id="vt" data-k="vt"><option value="ro">Registered office of the company</option><option value="oth">Other place</option></select>
+<div id="vow"><label for="vd">Venue description</label><input id="vd" data-k="vd" placeholder="the Corporate Office of the Company"><label for="va">Venue address</label><textarea id="va" data-k="va" style="min-height:48px" placeholder="Full address of the place where the meeting is held"></textarea></div>
+<p class="hint">For VC meetings this is the deemed venue. It flows into the notice, minutes, attendance register and CTC.</p>
+<label for="chair">Chairperson</label><input id="chair" data-k="chair" placeholder="Dr. Soumyaroop Dash">
+</fieldset>
+<fieldset><legend>Attendance</legend>
+<div class="tools" id="ptabs" role="group" aria-label="Attendance list"></div>
+<div id="plist"></div>
+<button id="padd">+ Add person</button>
+<p class="hint" id="phint"></p>
+<div id="gmw"><label for="mem">Members present</label><input id="mem" data-k="mem" placeholder="2 members holding 3,02,50,893 equity shares representing 99.65 % of paid-up share capital"></div>
+<label class="ck"><input type="checkbox" data-c="short"> Held at shorter notice with consent</label>
+<label class="ck" id="exw"><input type="checkbox" data-c="exempt"> Auditors exempted from attending</label>
+</fieldset>
+<fieldset><legend>Agenda items</legend>
+<div id="pvw"><div class="row"><div><label for="prevNo">Previous meeting no.</label><input id="prevNo" data-k="prevNo" placeholder="2nd"></div><div><label for="prevDate">Previous meeting date</label><input id="prevDate" type="date" data-k="prevDate"></div></div>
+<label for="circ">Resolutions passed by circulation since the last meeting (one per line)</label><textarea id="circ" data-k="circ" style="min-height:44px" placeholder="Circular Resolution No. 01/2026-27 approved on August 10, 2026"></textarea>
+<p class="hint">Items marked Compulsory appear in every notice, agenda and minutes. Open one to change its wording; Reset brings back the standard text.</p></div>
+<div class="tools" id="tplw"><select id="tpl" aria-label="Add item from template"></select></div>
+<div id="items"></div>
+<p class="hint">Text in [square brackets] is a placeholder and is highlighted in the preview. To add a table, type each row as | Name | Level | and make the first row the header.</p>
+</fieldset>
+<fieldset><legend>Notice and signing details</legend>
+<label for="email">Email for VC and leave requests</label><input id="email" data-k="email">
+<div class="row"><div><label for="adv">Advance intimation</label><input id="adv" data-k="adv"></div><div><label for="link">Meeting link</label><input id="link" data-k="link" placeholder="https://"></div></div>
+<label for="annex">Annexures (one per line)</label><textarea id="annex" data-k="annex" style="min-height:56px" placeholder="Annexure 1 – Draft Minutes of previous Board Meeting"></textarea>
+<label for="axf">Upload annexure files (PDF, Word, Excel, images)</label><div class="ax"><input type="file" id="axf" multiple></div>
+<p class="hint">Uploaded files are numbered after the lines above, listed in the notice, and attached in a ZIP with the notice or agenda when you download.</p>
+<div id="axl"></div>
+<div class="row"><div><label for="csn">Company Secretary</label><input id="csn" data-k="csn"></div><div><label for="acs">Membership no.</label><input id="acs" data-k="acs" placeholder="ACS 00000"></div></div>
+</fieldset>
+<fieldset id="nsw"><legend>Who signs</legend>
+<p class="hint">Leave blank to use the Company Secretary. Pick a director's name to have the notice or register signed by a director instead.</p>
+<label for="nsn">Notice and agenda signed by</label><div class="row"><input id="nsn" data-k="nsn" list="pnames" placeholder="Company Secretary"><input id="nsd" data-k="nsd" placeholder="Designation (e.g. Director)"></div>
+<input id="nsi" data-k="nsi" placeholder="Membership no. or DIN (e.g. DIN: 01234567)" style="margin-top:6px">
+<label for="asn">Attendance register authenticated by</label><div class="row"><input id="asn" data-k="asn" list="pnames" placeholder="Company Secretary"><input id="asd" data-k="asd" placeholder="Designation"></div>
+<datalist id="pnames"></datalist><datalist id="axnames"></datalist>
+</fieldset>
+<fieldset id="ntw"><legend>Notice format</legend>
+<details id="ntd"><summary style="cursor:pointer">Edit the notice wording</summary>
+<p class="hint">Change any wording below. Words in braces fill in automatically: <code>{COMPANY}</code> <code>{REG_ADDRESS}</code> <code>{BODY}</code> <code>{MEETING_WORD}</code> <code>{MEETING_NO}</code> <code>{FY}</code> <code>{FY_SHORT}</code> <code>{DATE}</code> <code>{TIME}</code> <code>{VENUE}</code> <code>{EMAIL}</code> <code>{ADVANCE}</code> <code>{LINK}</code> <code>{MEMBERS}</code> <code>{CHAIR}</code> <code>{ANNEXURES}</code> <code>{SIGNATURE}</code>. Leave a blank line between paragraphs. <code>**bold**</code>, <code>*italic*</code>. Start a paragraph with <code>CENTER:</code> or <code>LEFT:</code> to align it, and with <code>VC:</code>, <code>NOT VC:</code>, <code>SHORT:</code> or <code>NOT SHORT:</code> to show it only for that kind of meeting.</p>
+<textarea id="ntpl" spellcheck="false"></textarea>
+<div class="bar" style="justify-content:flex-start;flex-wrap:wrap"><button id="ntsave" class="p">Save as my format</button><button id="ntreset">Reset to standard</button><span class="hint grow" id="ntst" style="margin:0"></span></div>
+</details>
+</fieldset>
+<fieldset id="lhw"><legend>Letterhead</legend>
+<p class="hint">Saved for this company on this device. It goes on the notice, agenda, CTC and attendance register (not the minutes).</p>
+<label for="lhf">Header image (PNG or JPG, full page width) or a Word letterhead (.docx)</label><input type="file" id="lhf" accept=".png,.jpg,.jpeg,.docx,image/png,image/jpeg">
+<label for="lhff">Footer image (optional, PNG or JPG)</label><input type="file" id="lhff" accept=".png,.jpg,.jpeg,image/png,image/jpeg">
+<p class="hint" id="lhs"></p>
+<div id="lhu" style="display:flex;flex-wrap:wrap;gap:4px 14px"></div>
+<button id="lhx" style="margin-top:6px">Remove letterhead</button>
+</fieldset>
+<fieldset><legend>Signing</legend>
+<div class="row"><div><label for="place">Place</label><input id="place" data-k="place" placeholder="Pondicherry"></div><div><label for="din">Chairperson DIN</label><input id="din" data-k="din"></div></div>
+<label for="ref">CTC reference code (blank = automatic, e.g. BM, AC, EGM)</label><input id="ref" data-k="ref" placeholder="BM">
+</fieldset>
+<button id="reset" class="warn">Clear all</button>
+</section>
+<section>
+<div class="tools" id="docs" role="group" aria-label="Document"></div>
+<div class="tools" id="ctcb"></div>
+<div class="tools"><button class="p" id="dl">Download Word file</button><button id="dlw" style="display:none">Word only</button><button id="copy">Copy text</button><button id="print">Print or save as PDF</button><button id="clear" class="warn">Clear all</button><span id="msg" class="hint grow" role="status"></span></div>
+<div class="panel" id="chk"></div>
+
+<div class="wrap"><article class="sheet" id="sheet"></article></div>
+</section>
+</main>
+<footer class="site"><div class="card"><b style="color:var(--ink)">Have a suggestion?</b> Contact Vatsal Gangar at <a href="tel:+918879856768">+91 88798 56768</a>.</div></footer>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+var RO="Resolved further that any Director and/or Company Secretary of the Company be and is hereby authorized to do all such acts, deeds, matters and things as may be necessary, proper or expedient to give effect to this resolution.".replace(/^Resolved/,"RESOLVED").replace("further that","FURTHER THAT");
+var TG={
+"Adopt financial statements":{t:"To receive, consider and adopt the audited balance sheet as at March 31, [2026], the statement of profit & loss for the period from April 1, [2025] to March 31, [2026], together with the reports of the Directors and Auditors thereon",sp:"Ordinary",r:"RESOLVED THAT the audited financial statements of the Company for the financial year ended March 31, [2026], and the reports of the Board of Directors and Auditors thereon, as circulated to the members, be and are hereby considered and adopted."},
+"Re-appoint director retiring by rotation":{t:"To re-appoint a director in place of [Name] (DIN [______]) who retires by rotation in terms of Section 152(6) of the Companies Act, 2013 and being eligible, seeks re-appointment",sp:"Ordinary",r:"RESOLVED THAT pursuant to Section 152 and other applicable provisions of the Companies Act, 2013, the approval of the Members of the Company be and is hereby accorded to re-appoint [Name] (DIN [______]) as a Director, liable to retire by rotation."},
+"Appoint statutory auditors":{t:"To appoint [M/s. ______], Chartered Accountants, as the Statutory Auditors",sp:"Ordinary",r:"RESOLVED THAT pursuant to Section 139 of the Companies Act, 2013 and the rules made thereunder, and on the recommendation of the Board of Directors, [M/s. ______], Chartered Accountants (Firm Registration No. [______]), be and are hereby appointed as the Statutory Auditors of the Company, to hold office from the conclusion of this Annual General Meeting until the conclusion of the Annual General Meeting to be held for the financial year [20__ \u2013 20__], at such remuneration plus out of pocket expenses and applicable taxes as may be approved by the Board of Directors.\n\nRESOLVED FURTHER THAT the Board of Directors be and is hereby authorized to do all such acts, deeds, things and matters as it may in its absolute discretion deem necessary, proper or desirable and to settle any question, difficulty or doubt that may arise in this regard."},
+"Private placement (special resolution)":{t:"To offer and issue [number] [class of securities] on a preferential and private placement basis",sp:"Special",r:"RESOLVED THAT pursuant to Sections 42, 55 and 62(1)(c) of the Companies Act, 2013 read with Rule 14 of the Companies (Prospectus and Allotment of Securities) Rules, 2014 and other applicable provisions, and subject to the FEMA Regulations and such approvals as may be required, the consent of the shareholders be and is hereby accorded to offer and issue [number] [class of securities] of face value of INR [__] each at [price] on private placement basis to [Name of investor], through a serially numbered private placement offer cum application letter in Form PAS-4.\n\nRESOLVED FURTHER THAT the Board of the Company be and is hereby authorized to do all such acts, deeds and things as it may deem necessary or incidental for giving effect to the foregoing resolution, and each of the directors be and is hereby severally authorized to certify, sign, deliver and submit this resolution as and when required."}
+};
+var DEF={k:"board",cn:"",co:"Creation Science IVF Private Limited",addr:"Plot No. 16, Moolakulam, Oulgaret Municipality, Reddiyarpalayam, Pondicherry \u2013 605010",no:"",fy:"2026 \u2013 2027",date:"",start:"",end:"",mode:"vc",chair:"",dir:"",att:"",inv:"",aud:"",mem:"",place:"",din:"",prevDate:"",doc:"min",email:"corporate@srishtiivfhospital.com",adv:"two working days",link:"",annex:"",csn:"Vatsal Gangar",acs:"ACS 72322",short:true,exempt:true,vt:"ro",vd:"",va:"",ref:"",prevNo:"",circ:"",loa:"",nsn:"",nsd:"",nsi:"",asn:"",asd:"",ntpl:"",fx:{},ax:[],items:[]};
+var BLANK=Object.assign(JSON.parse(JSON.stringify(DEF)),{co:"",addr:"",fy:"",email:"",adv:"",csn:"",acs:""});
+var D=JSON.parse(JSON.stringify(DEF)),KEY="minutes-builder-v2",$=function(s){return document.querySelector(s)};
+try{var sv=localStorage.getItem(KEY);if(sv)D=Object.assign(D,JSON.parse(sv))}catch(e){}
+if(!D.fx||typeof D.fx!=="object")D.fx={};D.items=(D.items||[]).filter(function(it){return!(it.std||/^(record of attendance|to take note of the minutes of previous meeting|to take note on the resolutions passed by circulation)/i.test(it.t||""))});
+function save(){try{localStorage.setItem(KEY,JSON.stringify(D))}catch(e){}}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function mk(s){return esc(s).replace(/\[[^\]]*\]/g,function(m){return"<mark>"+m+"</mark>"})}
+function ph(s,f){s=(s||"").trim();return s?esc(s):"<mark>["+f+"]</mark>"}
+function fd(v){if(!v)return"";var p=v.split("-");return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString("en-US",{weekday:"long",month:"long",day:"numeric",year:"numeric"})}
+function ft(v){if(!v)return"";var p=v.split(":"),h=+p[0];return String((h%12)||12).padStart(2,"0")+":"+p[1]+" "+(h>=12?"P.M.":"A.M.")+" [IST]"}
+function ppl(txt,vc){var L=(txt||"").split("\n").map(function(x){return x.trim()}).filter(Boolean);if(!L.length)return"";
+ return"<table>"+L.map(function(l){var p=l.split("|").map(function(x){return x.trim()}),r=p[1]||p[3]||"";
+ if(p[2]&&vc)r+=(r?" ":"")+"(Present through VC from "+p[2]+")";return"<tr><td>"+esc(p[0])+"</td><td>:</td><td>"+esc(r)+"</td></tr>"}).join("")+"</table>"}
+function sec(h,b){return b?"<p class='t'>"+h+"</p>"+b:""}
+function istab(p){var L=p.split("\n").map(function(x){return x.trim()}).filter(Boolean);return L.length>0&&L.every(function(l){return l[0]==="|"})}
+function gt(p){var L=p.split("\n").map(function(x){return x.trim()}).filter(Boolean);return"<table class='g'>"+L.map(function(l,ri){var t=ri?"td":"th";return"<tr>"+l.replace(/^\||\|$/g,"").split("|").map(function(c){return"<"+t+">"+mk(c.trim())+"</"+t+">"}).join("")+"</tr>"}).join("")+"</table>"}
+function body(t){return t.split(/\n\s*\n/).filter(function(x){return x.trim()}).map(function(p){return istab(p)?gt(p):"<p>"+mk(p)+"</p>"}).join("")}
+function res(r){var P=r.split(/\n\s*\n/).filter(function(x){return x.trim()}),li=-1;P.forEach(function(p,i){if(!istab(p))li=i});
+ return P.map(function(p,i){if(istab(p))return gt(p);var h=mk(p).replace(/^(RESOLVED( FURTHER)? THAT)/,"<b>$1</b>");return"<p>"+(i?"":"\u201c")+h+(i===li?"\u201d":"")+"</p>"}).join("")}
+function tl(){return TG}
+function gm(){return D.k==="egm"||D.k==="agm"}
+function renderMin(){var d=D,vc=d.mode!=="phy",g=gm(),h="";
+ var kind=d.k==="board"?"BOARD MEETING FOR THE FINANCIAL YEAR "+d.fy:d.k==="com"?(d.cn||"[COMMITTEE]").toUpperCase()+" MEETING FOR THE FINANCIAL YEAR "+d.fy:d.k==="egm"?"EXTRA ORDINARY GENERAL MEETING FOR THE FINANCIAL YEAR "+d.fy:"ANNUAL GENERAL MEETING OF MEMBERS";
+ var at=(g&&vc?"DEEMED VENUE AT ":"AT ")+vphr(1),hd=
+ "MINUTES OF THE "+ph((d.no||"").toUpperCase(),"NO.")+" "+esc(kind)+" OF "+ph((d.co||"").toUpperCase(),"COMPANY")+" HELD ON "+ph(fd(d.date).toUpperCase(),"DATE")+
+ ", COMMENCED AT "+ph(ft(d.start),"TIME")+" AND CONCLUDED AT "+ph(ft(d.end),"TIME")+" "+(vc?"THROUGH VIDEO CONFERENCING (\u201cVC\u201d) / OTHER AUDIO \u2013 VISUAL MEANS (\u201cOAVM\u201d), ":"")+at+".";
+ h+="<p class='h'>"+hd+"</p>";
+ h+=sec("DIRECTORS PRESENT",ppl(d.dir,vc&&!g))||sec("DIRECTORS PRESENT","<p><mark>[add directors present]</mark></p>");
+ h+=sec(g?"INVITEES PRESENT":"IN ATTENDANCE",ppl(d.att,vc&&!g));
+ if(d.inv.trim())h+=sec(g?"SPECIAL INVITEES PRESENT":"INVITEES PRESENT",ppl(d.inv,vc&&!g));
+ if(g){if(d.aud.trim())h+=sec("AUDITOR PRESENT",ppl(d.aud,false));h+=sec("MEMBERS PRESENT","<p>"+ph(d.mem,"members present, shares held and % of paid-up capital")+" attended the meeting"+(vc?" through VC":"")+".</p>")}
+ if(g)h+=sec("CHAIRPERSON OF THE MEETING","<p>"+ph(d.chair,"Chairperson")+" was "+(g?"requested to chair the meeting and was ":"")+"unanimously elected as the Chairperson for the Meeting.</p>");
+ var B=d.k==="com"?"Committee":"Board",vcp="<p>In compliance with the procedure prescribed under Section 173(2) of the Companies Act, 2013, read with Rule 3 of the Companies (Meetings of Board and its Powers) Rules, 2014, the Company Secretary informed the "+B+" that the meeting was being conducted through Video Conferencing (VC) / Other Audio-Visual Means (OAVM) in accordance with the applicable provisions.</p><p>The Company Secretary confirmed that all the "+(d.k==="com"?"Members":"Directors")+" participating in the meeting had joined through VC/OAVM. The "+(d.k==="com"?"Members":"Directors")+" so participating recorded their presence by stating:\na) Their name;\nb) The location from where they were attending the meeting;\nc) That they had received the agenda and all relevant materials for the meeting in advance; and\nd) That no person, other than themselves, was present or had access to the proceedings at their respective locations.</p>";
+ if(g){var nm=(d.no||"[no.]")+" "+(d.k==="agm"?"Annual General Meeting":"Extra Ordinary General Meeting");
+  var q="<p>The requisite quorum being present, the Company Secretary with the permission of the Chair called the meeting to order and initiated the proceedings. The Company Secretary greeted the members and welcomed them to the "+mk(nm)+" of the Company. The Company Secretary introduced all the directors"+(d.k==="agm"?", key managerial personnel and the auditors":"")+" present in the meeting."+(d.short?" Consent from all the shareholders to hold the meeting at shorter notice was received.":"")+"</p><p>The Company Secretary inter alia informed the members that:\n\u2022 The meeting was being conducted "+(vc?"through VC ":"")+"in accordance with the provisions of the Companies Act, 2013 (the Act)"+(vc?" and circulars issued by the Ministry of Corporate Affairs (MCA)":"")+".\n\u2022 "+(d.k==="agm"?"The Annual Report containing the Board\u2019s report, statutory auditor\u2019s report, financial statements and other reports along with the Notice of the "+mk(nm)+" were":"The Notice of the "+mk(nm)+" was")+" circulated to the members at their registered email addresses and the same were taken as read.\n"+(d.k==="agm"?"\u2022 The Statutory Auditor\u2019s Report for the year ended March 31, [2026] did not contain any qualification, observation, comment or adverse remark and the same was taken as read.\n".replace(/\[[^\]]*\]/,function(m){return"\u0001"+m+"\u0002"}):"")+"\u2022 The Register of Directors and Key Managerial Personnel and their shareholdings, Register of Contracts, Memorandum and Articles of Association, and other relevant documents were made available electronically for inspection during the meeting.</p><p>With the permission of the Chair, the Company Secretary briefed the members on each resolution proposed in the Notice.</p>"+(d.exempt?"<p>On the request, an exemption to the Auditors was given from attending the present meeting.</p>":"");
+  h+=sec("QUORUM",q.replace(/\u0001/g,"<mark>").replace(/\u0002/g,"</mark>"))}
+ var rn=0;
+ allItems().forEach(function(it,i){h+="<p class='t'>ITEM NO. "+(i+1)+"</p><p class='t' style='margin-top:0'>"+mk((it.t||"Untitled item").toUpperCase())+(g&&it.sp?" \u2013 "+it.sp.toUpperCase()+" RESOLUTION":"")+"</p>";
+  if(g){if(it.r&&it.r.trim()){rn++;h+="<p>The following resolution was proposed by "+ph(it.pr,"proposer")+" and seconded by "+ph(it.se,"seconder")+" to be passed as "+(it.sp==="Special"?"a Special":"an Ordinary")+" Resolution.</p><p class='rn'>Resolution No. "+rn+"</p>"+res(it.r)+"<p>With the permission of the Chair, the Company Secretary declared the resolution as unanimously approved by the shareholders with no dissenting votes recorded.</p>"}else if(it.mn||it.n)h+=body(it.mn||it.n)}
+  else{if(it.mn||it.n)h+=body(it.mn||it.n);if(it.r&&it.r.trim()){rn++;h+="<p>After discussion, the following resolution was passed unanimously.</p><p class='rn'>Resolution No. "+rn+"</p>"+res(it.r)}}});
+ if(g&&d.items.length)h+="<p>The Company Secretary declared that all polling forms received from the members present and entitled to vote were duly received. No votes were cast against any of the resolutions set out in the Notice. Accordingly, all the resolutions were duly passed.</p>";
+ h+=sec("VOTE OF THANKS","<p>There being no other business to transact, the Company Secretary concluded the proceedings"+(g?" and thanked all the shareholders for their kind attention, cooperative and valuable support and time devoted to the meeting, and concluded the meeting with the vote of thanks to the Chairperson, Board Members"+(d.k==="agm"?", Special Invitees & Auditors":""):" and the meeting concluded with a vote of thanks to the Chairperson")+".</p>");
+ h+="<div class='sig'><p style='margin:0'>Date of Entry:</p><p style='margin:26px 0 0'><b>"+ph(d.chair,"Chairperson")+"</b><br>Chairperson of the Meeting<br>DIN: "+ph(d.din,"DIN")+"</p><p style='margin:16px 0 0'>Place: "+ph(d.place,"place")+"<br>Date:</p></div>";
+ return h}
+function vis(){var g=gm();$("#cnw").style.display=D.k==="com"?"":"none";$("#gmw").style.display=g?"":"none";$("#exw").style.display=g?"":"none";$("#vow").style.display=D.vt==="oth"?"":"none";
+ $("#tplw").style.display=g?"":"none";$("#ntw").style.display=g?"none":"";$("#pvw").style.display=g?"none":"";
+ var T=tl();$("#tpl").innerHTML="<option value=''>Add an item\u2026</option>"+Object.keys(T).map(function(k){return"<option>"+esc(k)+"</option>"}).join("")+"<option value='__'>Blank item</option>"}
+function userCard(it,i,num){var g=gm(),e=document.createElement("div");e.className="item";
+ e.innerHTML="<label>Item "+num+" title</label><input data-f='t'><label>Explanatory note (notice and agenda; the minutes reuse it unless you fill the next box)</label><textarea data-f='n'></textarea><label>Minutes wording (optional)</label><textarea data-f='mn'></textarea><label>Resolution (draft in the agenda, passed in the minutes; leave empty for a noting item)</label><textarea data-f='r'></textarea>"+(g?"":"<label>Annexure for this item (shown in the index)</label><input data-f='ax' list='axnames' placeholder='Annexure 2'>")+
+ (g?"<div class='row'><div><label>Proposed by</label><input data-f='pr'></div><div><label>Seconded by</label><input data-f='se'></div></div><label>Resolution type</label><select data-f='sp'><option>Ordinary</option><option>Special</option></select>":"")+
+ "<div class='bar'><button data-a='up'>Up</button><button data-a='dn'>Down</button><button data-a='rm'>Remove</button></div>";
+ e.querySelectorAll("[data-f]").forEach(function(f){f.value=it[f.dataset.f]||"";f.oninput=function(){it[f.dataset.f]=f.value;save();render()}});
+ e.querySelectorAll("button").forEach(function(b){b.onclick=function(){var a=b.dataset.a;if(a==="rm")D.items.splice(i,1);else{var j=a==="up"?i-1:i+1;if(j<0||j>=D.items.length)return;var t=D.items[i];D.items[i]=D.items[j];D.items[j]=t}save();items();render()}});return e}
+function fxCard(it){var k=it.fk,e=document.createElement("details");e.className="item fx";e.dataset.fk=k;
+ e.innerHTML="<summary><span class='fxn'></span><span class='tag'>Compulsory</span></summary><label>Title</label><input data-ff='t'><label>Agenda note (notice and agenda)</label><textarea data-ff='n'></textarea><label>Minutes wording</label><textarea data-ff='mn'></textarea><label>Resolution (optional; fill only if a resolution is passed under this item)</label><textarea data-ff='r' style='min-height:50px'></textarea><label>Annexure for this item (shown in the index)</label><input data-ff='ax' list='axnames' placeholder='none'><div class='bar'><span class='hint grow fxs' style='margin:0'></span><button data-a='rs'>Reset to standard text</button></div>";
+ e.querySelectorAll("[data-ff]").forEach(function(f){f.value=it[f.dataset.ff]||"";f.oninput=function(){var o=D.fx[k]=D.fx[k]||{};o[f.dataset.ff]=f.value;save();render()}});
+ e.querySelector("[data-a=rs]").onclick=function(){var nc=(D.fx[k]||{}).noctc;D.fx[k]=nc?{noctc:nc}:{};save();e.querySelectorAll("[data-ff]").forEach(function(f){f.value=""});render()};return e}
+function items(){var box=$("#items"),g=gm(),A=allItems(),num=0;box.innerHTML="";
+ A.forEach(function(it){num++;if(it.fk){if(it.fk==="aob"){var ad=document.createElement("button");ad.textContent="+ Add agenda item";ad.style.margin="0 0 10px";ad.onclick=function(){D.items.push({t:"",n:"",mn:"",r:""});save();items();render();var c=box.querySelectorAll("div.item");if(c.length)c[c.length-1].querySelector("input").focus()};box.appendChild(ad)}box.appendChild(fxCard(it))}
+  else box.appendChild(userCard(it,D.items.indexOf(it),num))});refreshFx()}
+function refreshFx(){if(gm())return;var n=0;allItems().forEach(function(it){n++;if(!it.fk)return;var e=document.querySelector("details[data-fk='"+it.fk+"']");if(!e)return;var o=D.fx[it.fk]||{};
+ e.querySelector(".fxn").textContent="Item "+n+" · "+(it.t||"");
+ e.querySelectorAll("[data-ff]").forEach(function(f){var k=f.dataset.ff;if(o[k]==null&&f!==document.activeElement)f.value=it[k]||""});
+ var ed=["t","n","mn","r","ax"].some(function(k){return o[k]!=null});e.querySelector(".fxs").textContent=ed?"Edited":"Standard text";e.querySelector("[data-a=rs]").style.display=ed?"":"none"})}
+function sync(){document.querySelectorAll("[data-k]").forEach(function(el){el.value=D[el.dataset.k]||""});document.querySelectorAll("[data-c]").forEach(function(el){el.checked=!!D[el.dataset.c]})}
+$("#tpl").onchange=function(){var v=this.value;if(!v)return;var T=tl();D.items.push(v==="__"?{t:"",n:"",r:""}:JSON.parse(JSON.stringify(T[v])));this.value="";save();items();render()};
+document.querySelectorAll("[data-k]").forEach(function(el){el.addEventListener("input",function(){var was=gm();D[el.dataset.k]=el.value;if(el.dataset.k==="k"&&was!==gm()){D.items=[]}save();vis();if(el.dataset.k==="k"){items();peopleUI()}if(el.dataset.k==="annex")axUI();render()})});
+document.querySelectorAll("[data-c]").forEach(function(el){el.addEventListener("change",function(){D[el.dataset.c]=el.checked;save();render()})});
+function say(t){$("#msg").textContent=t;setTimeout(function(){$("#msg").textContent=""},4000)}
+$("#copy").onclick=function(){var s=$("#sheet");function fb(){var r=document.createRange();r.selectNodeContents(s);var x=getSelection();x.removeAllRanges();x.addRange(r);try{document.execCommand("copy");say("Copied. Paste into Word.")}catch(e){say("Copy is blocked here. Open the page in its own tab.")}x.removeAllRanges()}
+ try{var h="<div style='font-family:Times New Roman;font-size:12pt'>"+s.innerHTML+"</div>";navigator.clipboard.write([new ClipboardItem({"text/html":new Blob([h],{type:"text/html"}),"text/plain":new Blob([s.innerText],{type:"text/plain"})})]).then(function(){say("Copied. Paste into Word.")},fb)}catch(e){fb()}};
+
+function X(t){return String(t).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;")}
+var FN='<w:rFonts w:ascii="Book Antiqua" w:hAnsi="Book Antiqua" w:cs="Times New Roman"/>';
+var CF={min:{pw:12240,ph:20160,mt:2160,mr:1797,mb:2880,ml:1797,sz:24,line:360,tw:8636},not:{pw:11906,ph:16838,mt:1440,mr:1440,mb:1440,ml:1440,sz:22,line:320,tw:9026},att:{pw:11906,ph:16838,mt:1440,mr:1440,mb:1440,ml:1440,sz:19,line:240,tw:9026},ctc:{pw:11906,ph:16838,mt:1440,mr:1440,mb:1440,ml:1440,sz:24,line:360,tw:9026,af:160}},CFG=CF.min,HL=[];
+function rr(t,o){return'<w:r><w:rPr>'+FN+(o.b?'<w:b/><w:bCs/>':'')+(o.i?'<w:i/><w:iCs/>':'')+(o.lnk?'<w:color w:val="0563C1"/>':'')+'<w:sz w:val="'+CFG.sz+'"/><w:szCs w:val="'+CFG.sz+'"/>'+(o.h?'<w:highlight w:val="yellow"/>':'')+((o.u||o.lnk)?'<w:u w:val="single"/>':'')+'</w:rPr>'+t+'</w:r>'}
+function runs(n,o){var out="";n.childNodes.forEach(function(c){
+ if(c.nodeType===3){c.nodeValue.split("\n").forEach(function(l,i){if(i)out+=rr("<w:br/>",o);if(l)out+=rr('<w:t xml:space="preserve">'+X(l)+'</w:t>',o)})}
+ else if(c.nodeName==="BR")out+=rr("<w:br/>",o);
+ else if(c.nodeName==="B")out+=runs(c,Object.assign({},o,{b:1}));
+ else if(c.nodeName==="I"||c.nodeName==="EM")out+=runs(c,Object.assign({},o,{i:1}));
+ else if(c.nodeName==="MARK")out+=runs(c,Object.assign({},o,{h:1}));
+ else if(c.nodeName==="SPAN"&&c.getAttribute("data-pr")){FLD=1;out+=rr('<w:fldChar w:fldCharType="begin"/>',o)+rr('<w:instrText xml:space="preserve"> PAGEREF '+c.getAttribute("data-pr")+' \\h </w:instrText>',o)+rr('<w:fldChar w:fldCharType="separate"/>',o)+rr('<w:t xml:space="preserve">'+X(c.textContent||"")+'</w:t>',o)+rr('<w:fldChar w:fldCharType="end"/>',o)}
+ else if(c.nodeName==="A"&&c.getAttribute("href")){var id="rId"+(100+HL.length);HL.push(c.getAttribute("href"));out+='<w:hyperlink r:id="'+id+'" w:history="1">'+runs(c,Object.assign({},o,{lnk:1}))+'</w:hyperlink>'}
+ else out+=runs(c,o)});return out}
+function para(n,o){o=o||{};return'<w:p><w:pPr>'+(o.bd?'<w:pBdr><w:bottom w:val="single" w:sz="12" w:space="1" w:color="auto"/></w:pBdr>':'')+'<w:spacing w:after="'+(o.af==null?(CFG.af==null?200:CFG.af):o.af)+'" w:line="'+CFG.line+'" w:lineRule="auto"/><w:jc w:val="'+(o.jc||"both")+'"/></w:pPr>'+bmS(n)+runs(n,o)+bmE(n)+'</w:p>'}
+var BMI=0,FLD=0;function bmS(n){var b=n.getAttribute&&n.getAttribute("data-bm");if(!b)return"";n._bi=++BMI;return'<w:bookmarkStart w:id="'+n._bi+'" w:name="'+b+'"/>'}
+function bmE(n){var i=n._bi;n._bi=0;return i?'<w:bookmarkEnd w:id="'+i+'"/>':""}
+function tbl(t){var g=t.className==="g",dw=t.getAttribute("data-w"),n=t.rows[0].cells.length,W=dw?dw.split(",").map(Number):(g?Array(n).fill(Math.floor(CFG.tw/n)):[3661,356,4619]),tw=W.reduce(function(a,b){return a+b},0),
+ bd=g?"<w:tblBorders>"+["top","left","bottom","right","insideH","insideV"].map(function(k){return"<w:"+k+' w:val="single" w:sz="4" w:space="0" w:color="auto"/>'}).join("")+"</w:tblBorders>":"",
+ x='<w:tbl><w:tblPr><w:tblW w:w="'+tw+'" w:type="dxa"/>'+bd+'<w:tblLayout w:type="fixed"/></w:tblPr><w:tblGrid>'+W.map(function(w){return'<w:gridCol w:w="'+w+'"/>'}).join("")+'</w:tblGrid>';
+ Array.prototype.forEach.call(t.rows,function(r){x+="<w:tr>";Array.prototype.forEach.call(r.cells,function(c,i){x+='<w:tc><w:tcPr><w:tcW w:w="'+(W[i]||W[0])+'" w:type="dxa"/></w:tcPr>'+para(c,{af:0,jc:"left",b:c.tagName==="TH"})+"</w:tc>"});x+="</w:tr>"});return x+"</w:tbl>"+para(document.createElement("span"),{af:120})}
+function docxBlob(el,key){return lhParts().then(function(L){return docxBuild(el,key,L)})}
+function docxBuild(el,key,L){CFG=CF[key]||CF.min;if(L&&L.kind==="img")L=imgParts(L,FT0(key));HL=[];BMI=0;FLD=0;var FT=key==="not"&&!(L&&L.foot);var b="";Array.prototype.forEach.call(el.children,function(c){var k=c.className.split(" ");
+ if(c.tagName==="TABLE")b+=tbl(c);
+ else if(k[0]==="sig"){Array.prototype.forEach.call(c.children,function(q,i){b+=para(q,{jc:"left",af:i===0?400:(i===1?240:0)})})}
+ else if(k[0]==="pb")b+='<w:p><w:r><w:br w:type="page"/></w:r></w:p>';
+ else if(c.tagName==="P"&&k[0]!=="lhn"){var f=k[0];b+=para(c,{b:f==="h"||f==="t"||f==="ct"||f==="ru",u:f==="rn"||f==="ru",bd:f==="h",jc:f==="ct"?"center":(k.indexOf("l")>-1?"left":"both"),af:f==="t"?60:f==="ru"||f==="sp"?0:(f==="h"&&CFG===CF.ctc?240:null)})}});
+ var NS='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships"',z=new JSZip();
+ z.file("[Content_Types].xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Types xmlns="http://schemas.openxmlformats.org/package/2006/content-types"><Default Extension="rels" ContentType="application/vnd.openxmlformats-package.relationships+xml"/><Default Extension="xml" ContentType="application/xml"/><Override PartName="/word/document.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.document.main+xml"/>'+(FT?'<Override PartName="/word/footer1.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>':'')+(FLD?'<Override PartName="/word/settings.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.settings+xml"/>':'')+(L?L.ct:'')+'</Types>');
+ z.file("_rels/.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rId1" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument" Target="word/document.xml"/></Relationships>');
+ if(HL.length||FT||FLD||L)z.file("word/_rels/document.xml.rels",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships">'+HL.map(function(h,i){return'<Relationship Id="rId'+(100+i)+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink" Target="'+X(h).replace(/"/g,"&quot;")+'" TargetMode="External"/>'}).join("")+(FT?'<Relationship Id="rIdF" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="footer1.xml"/>':'')+(FLD?'<Relationship Id="rIdS" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/settings" Target="settings.xml"/>':'')+(L?L.rels:'')+'</Relationships>');
+ if(L)Object.keys(L.files).forEach(function(p){z.file(p,L.files[p])});
+ if(FT)z.file("word/footer1.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr '+NS+'><w:p><w:pPr><w:jc w:val="center"/></w:pPr>'+rr('<w:t xml:space="preserve">Page </w:t>',{})+rr('<w:fldChar w:fldCharType="begin"/>',{})+rr('<w:instrText xml:space="preserve"> PAGE </w:instrText>',{})+rr('<w:fldChar w:fldCharType="separate"/>',{})+rr('<w:t>1</w:t>',{})+rr('<w:fldChar w:fldCharType="end"/>',{})+'</w:p></w:ftr>');
+ if(FLD)z.file("word/settings.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:settings xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main"><w:updateFields w:val="true"/></w:settings>');
+ z.file("word/document.xml",'<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:document '+NS+'><w:body>'+b+'<w:sectPr>'+(L?L.sect:'')+(FT?'<w:footerReference w:type="default" r:id="rIdF"/>':'')+'<w:pgSz w:w="'+CFG.pw+'" w:h="'+CFG.ph+'"/>'+(L&&L.pgMar?L.pgMar:'<w:pgMar w:top="'+Math.max(CFG.mt,L&&L.mt||0)+'" w:right="'+CFG.mr+'" w:bottom="'+Math.max(CFG.mb,L&&L.mb||0)+'" w:left="'+CFG.ml+'" w:header="708" w:footer="708" w:gutter="0"/>')+(L&&L.titlePg?'<w:titlePg/>':'')+'</w:sectPr></w:body></w:document>');
+ return z.generateAsync({type:"blob",mimeType:"application/vnd.openxmlformats-officedocument.wordprocessingml.document"})}
+function FT0(key){return key==="not"}
+function anchorSave(name,blob){try{var u=URL.createObjectURL(blob),a=document.createElement("a");a.href=u;a.download=name;document.body.appendChild(a);a.click();a.remove();setTimeout(function(){URL.revokeObjectURL(u)},5000);return"ok"}catch(e){return"fail"}}
+function saveFile(name,blob){var c;try{c=window.claude&&claude.use?Promise.resolve(claude.use("downloads")).catch(function(){return null}):Promise.resolve(null)}catch(e){c=Promise.resolve(null)}
+ return c.then(function(dl){if(!dl)return anchorSave(name,blob);return dl.save({filename:name,data:blob}).then(function(){return"ok"},function(e){return e&&e.code==="declined"?"declined":anchorSave(name,blob)})})}
+function safe(n){return String(n).replace(/[\\\/:*?"<>|]/g,"").replace(/\s+/g," ").trim()}
+function curDoc(){var doc=D.doc||"min";if(gm()&&doc!=="min"&&doc!=="ctc")doc="min";return doc}
+function zipMode(){var doc=curDoc();return(doc==="not"||doc==="agd")&&D.ax&&D.ax.length>0}
+function zipWith(docBlob,docName){var z=new JSZip(),m=lines(D.annex).length,miss=0;z.file(docName,docBlob);
+ return Promise.all(D.ax.map(function(a,i){return fget(a.id).then(function(b){if(!b){miss++;return}var ext=(a.name.match(/\.[^.]+$/)||[""])[0];z.file(safe("Annexure "+(m+i+1)+" - "+(a.title||a.name))+ext,b)})})).then(function(){return z.generateAsync({type:"blob",mimeType:"application/zip"})}).then(function(zb){return{b:zb,miss:miss}})}
+function doDl(withAx){var doc=curDoc(),key={att:"att",min:"min",ctc:"ctc"}[doc]||"not";
+ var pre={min:"Minutes of",not:"Notice of",agd:"Agenda of",att:"Attendance Register of",ctc:ctcPre()}[doc];
+ var base=safe(pre+" "+(D.no||"")+" "+(D.k==="board"?"Board Meeting":D.k==="com"?(D.cn||"Committee")+" Meeting":D.k==="egm"?"EGM":"AGM")+" "+(D.co||""));
+ say("Preparing the file…");
+ docxBlob($("#sheet"),key).then(function(b){
+  if(withAx&&zipMode())return zipWith(b,base+".docx").then(function(r){return Promise.resolve(saveFile(base+" with annexures.zip",r.b)).then(function(st){return[st,r.miss]})});
+  return Promise.resolve(saveFile(base+".docx",b)).then(function(st){return[st,0]})})
+ .then(function(r){say(r[0]==="declined"?"Download cancelled.":r[0]==="fail"?"The download could not be saved here.":r[1]?"Saved, but "+r[1]+" annexure file(s) could not be found on this device. Please upload them again.":"Saved.")})
+ .catch(function(){say("Could not build the file.")})}
+$("#dl").onclick=function(){doDl(true)};$("#dlw").onclick=function(){doDl(false)};
+$("#print").onclick=function(){try{window.print()}catch(e){say("Printing is blocked here. Use Copy for Word instead.")}};
+function clearAll(){if(!confirm("Clear all fields, agenda items and uploaded annexures? Saved entities are kept."))return;var doc=D.doc,old=(D.ax||[]).map(function(a){return a.id});D=JSON.parse(JSON.stringify(BLANK));D.doc=doc;fclear(old);save();sync();vis();items();axUI();peopleUI();ntUI();render();say("Everything cleared.")}
+$("#reset").onclick=clearAll;$("#clear").onclick=clearAll;
+
+function core(n){return(n||"").replace(/^(dr|mr|mrs|ms|prof|shri|smt)\.?\s+/i,"").trim().toLowerCase()}
+function names(t){return(t||"").split("\n").map(function(x){return x.split("|")[0].trim()}).filter(Boolean)}
+function chk(){var w=[],d=D,m=$("#sheet").querySelectorAll("mark").length;
+ if(m)w.push(m+" placeholder"+(m>1?"s":"")+" still to fill (highlighted yellow).");
+ if(d.start&&d.end&&d.end<d.start)w.push("The concluded time is earlier than the start time.");
+ if(d.chair.trim()){var cc=core(d.chair);
+  if(d.dir.trim()&&!names(d.dir).some(function(n){return core(n)===cc}))w.push("The Chairperson is not in the Directors present list.");
+  [d.dir,d.att,d.inv,d.aud].forEach(function(t){names(t).forEach(function(n){if(core(n)===cc&&n!==d.chair.trim()){var x="The Chairperson is written as \u201c"+n+"\u201d in the attendance list but \u201c"+d.chair.trim()+"\u201d elsewhere.";if(w.indexOf(x)<0)w.push(x)}})})}
+ if(d.k==="board"&&d.dir.trim()&&names(d.dir).length<2)w.push("Only one director is listed. Board quorum is two directors or one-third of the total strength, whichever is higher (Section 174). Check it against your strength.");
+ if(d.k==="board"&&d.date&&d.prevDate){var n=(Date.parse(d.date)-Date.parse(d.prevDate))/864e5;
+  if(n<0)w.push("This meeting is dated before the previous one.");else if(n>120)w.push("It has been "+Math.round(n)+" days since the previous Board meeting. Section 173(1) allows at most 120 days between meetings.")}
+ if(d.k==="agm"&&d.date){var Y=+d.date.slice(0,4);d.items.forEach(function(it){if(/auditor/i.test(it.t||"")){var q=(it.r||"").match(/financial year (\d{4})\s*[\u2013-]\s*(\d{2,4})/i);
+  if(q&&+q[1]!==Y+4)w.push("The auditor\u2019s term ends at the AGM for FY "+q[1]+" \u2013 "+q[2]+". A five-year term from this AGM would normally end at the AGM for FY "+(Y+4)+" \u2013 "+(Y+5)+". Please check.")}})}
+ if(!gm())names(d.loa).forEach(function(n){if(names(d.dir).some(function(m){return core(m)===core(n)}))w.push(n+" is listed both under Directors present and Leave of absence.")});
+ $("#chk").innerHTML=w.length?"<b>Check before you sign</b><ul>"+w.map(function(x){return"<li>"+esc(x)+"</li>"}).join("")+"</ul>":"<b>Check before you sign</b> No issues found.";}
+var EK="minutes-ents-v1";
+function ents(){try{return JSON.parse(localStorage.getItem(EK)||"{}")}catch(e){return{}}}
+function entUI(){var e=ents(),o=$("#ent");o.innerHTML="<option value=''>Choose a saved entity\u2026</option>"+Object.keys(e).map(function(k){return"<option>"+esc(k)+"</option>"}).join("")}
+var EF=["co","addr","dir","att","chair","din","place","email","csn","acs","nsn","nsd","nsi","asn","asd","ntpl"];
+$("#entsave").onclick=function(){if(!D.co.trim()){say("Enter the company name first.");return}var e=ents(),r={};EF.forEach(function(k){r[k]=D[k]});e[D.co.trim()]=r;
+ try{localStorage.setItem(EK,JSON.stringify(e));say("Entity saved on this device.")}catch(x){say("Saving is not available here.")}entUI();$("#ent").value=D.co.trim()};
+$("#ent").onchange=function(){var r=ents()[this.value];if(!r)return;EF.forEach(function(k){D[k]=r[k]||""});save();sync();peopleUI();ntUI();render()};
+$("#entdel").onclick=function(){var v=$("#ent").value;if(!v||!confirm("Delete the saved entity \u201c"+v+"\u201d?"))return;var e=ents();delete e[v];try{localStorage.setItem(EK,JSON.stringify(e))}catch(x){}entUI()};
+function ordn(n){var s=["th","st","nd","rd"],v=n%100;return n+(s[(v-20)%10]||s[v]||s[0])}
+$("#next").onclick=function(){if(!confirm("Start the next meeting? The date, times, agenda items, leave of absence, circular resolutions and annexures will be reset. Attendees and entity details stay."))return;
+ var m=(D.no||"").match(/\d+/),n=m?+m[0]:0;
+ D.prevNo=n?ordn(n).toLowerCase():"";D.prevDate=D.date;D.no=n?ordn(n+1).toUpperCase():"";D.date=D.start=D.end="";D.items=[];D.fx={};D.circ="";D.loa="";(D.ax||[]).forEach(function(a){fdel(a.id)});D.ax=[];
+ save();sync();items();axUI();peopleUI();render()};
+entUI();
+
+function ft2(v){if(!v)return"";var p=v.split(":"),h=+p[0];return((h%12)||12)+":"+p[1]+" "+(h>=12?"P.M.":"A.M.")+" [IST]"}
+function lines(t){return(t||"").split("\n").map(function(x){return x.trim()}).filter(Boolean)}
+var WD=["First","Second","Third","Fourth","Fifth","Sixth","Seventh","Eighth","Ninth","Tenth","Eleventh","Twelfth"];
+function nInfo(){var m=(D.no||"").match(/\d+/),n=m?+m[0]:0;return{w:n?(WD[n-1]||ordn(n)):"",n:n?String(n).padStart(2,"0"):""}}
+function signer(n,dsg,id){var nm=(n||"").trim(),cs=!nm;return{n:cs?D.csn:nm,d:(dsg||"").trim()||(cs?"Company Secretary":""),i:cs?D.acs:(id||"").trim()}}
+function sigHtml(){var s=signer(D.nsn,D.nsd,D.nsi);return"<p>Thanking you,</p><p><b>FOR AND ON BEHALF OF "+ph((D.co||"").toUpperCase(),"COMPANY")+"</b></p><p class='l'>[Digital signature]</p><p class='l'><b>"+ph((s.n||"").toUpperCase(),"NAME")+(s.d?"<br>"+esc(s.d.toUpperCase()):"<br><mark>[DESIGNATION]</mark>")+(s.i?"<br>"+esc(s.i.toUpperCase()):"")+"</b></p>"}
+function agItems(){var B=D.k==="com"?"Committee":"Board",A=[],rn=0;
+ allItems().forEach(function(x){var t=(x.t||"Untitled item").toUpperCase();if(!/\.$/.test(t))t+=".";var b="";
+  if(x.n&&x.n.trim())b+=body(x.n).replace("<p>","<p><b>Explanatory Note:</b> ");
+  if(x.r&&x.r.trim()){rn++;b+="<p>The matter is placed before the "+B+" for its consideration and approval.</p><p class='t'>Resolution No. "+rn+"</p><p class='t'>"+mk((x.t||"").toUpperCase())+"</p>"+res(x.r)}
+  A.push({t:t,b:b,raw:x.t||"Untitled item",ax:x.ax||""})});
+ A.push({t:"VOTE OF THANKS AND CLOSE OF MEETING.",b:"",raw:"Vote of thanks and close of meeting",ax:""});return A}
+function agendaHtml(){var A=agItems(),h="<p class='ct'>AGENDA</p><p>The following business is proposed to be transacted at the Meeting. Notes on Agenda, together with the relevant supporting documents and draft resolutions, are enclosed and form part of this Notice.</p>";
+ A.forEach(function(a,i){h+="<p class='t' data-bm='AgItem"+(i+1)+"'>ITEM NO. "+(i+1)+" "+mk(a.t)+"</p>"+a.b});
+ return h+sigHtml()}
+function indexHtml(){var A=agItems(),h="<p class='ct'>INDEX</p><table class='g' data-w='1100,6026,1900'><tr><th>Sr. No.</th><th>Particulars</th><th>Annexure</th></tr>";
+ A.forEach(function(a,i){h+="<tr><td>"+(i+1)+"</td><td>"+mk(a.raw)+"</td><td>"+(a.ax.trim()?mk(a.ax):"\u2013")+"</td></tr>"});
+ return h+"</table>"}
+var NT_STD=["CENTER: **NOTICE OF {MEETING_KIND}**",
+"LEFT: To,\nThe {ADDRESSEE},\n**{COMPANY}**\n{REG_ADDRESS}",
+"**Sub: Notice of the {MEETING_WORD} Meeting of the {BODY} of the Company for the Financial Year {FY}{SHORT_SUFFIX}.**",
+"LEFT: Dear Sir / Madam,",
+"Notice is hereby given that the **{MEETING_WORD} Meeting of the {BODY}** of the Company for the Financial Year {FY} (Meeting No. {MEETING_NO} of {FY_SHORT}) will be held{SHORT_AT} to transact the business set out in the Agenda on **{DATE}**, at **{TIME}** {VENUE}.",
+"VC: Further, as per Section 173(2) of the Companies Act, 2013 read with the Companies (Meetings of Board and its Powers) Rules, 2014 and the Secretarial Standard on Meetings of the Board of Directors (SS-1) issued by the Institute of Company Secretaries of India (ICSI), a {MEMBER} may attend the meeting through VC/OAVM.",
+"VC: {MEMBERS} who wish to attend the meeting through VC/OAVM are requested to intimate the same in advance, at least {ADVANCE} before the meeting, by sending an email to the undersigned at {EMAIL} so that necessary arrangements can be made in due time. {MEMBERS} who are unable to attend the meeting are requested to submit their request for leave of absence to the same email address.",
+"NOT VC: {MEMBERS} who are unable to attend the meeting are requested to submit their request for leave of absence to the undersigned at {EMAIL}.",
+"VC: **{LINK}**",
+"The Agenda, along with the explanatory notes, draft resolutions and the supporting documents listed below, is enclosed and forms part of this Notice.",
+"LEFT: {ANNEXURES}",
+"You are kindly requested to make it convenient to attend the meeting.",
+"{SIGNATURE}",
+"SHORT: *Note: This meeting is being held at shorter notice in accordance with the provisions of Section 173(3) of the Companies Act, 2013 read with Secretarial Standard-1 (SS-1) issued by ICSI.*"].join("\n\n");
+var NTK="minutes-notice-format-v1";
+function ntSaved(){try{return localStorage.getItem(NTK)||""}catch(e){return""}}
+function ntpl(){return D.ntpl||ntSaved()||NT_STD}
+function ntUI(){var t=$("#ntpl");if(document.activeElement!==t)t.value=ntpl();$("#ntst").textContent=D.ntpl?(D.ntpl===ntSaved()?"Using your saved format":"Edited for this meeting (not yet saved as your format)"):ntSaved()?"Using your saved format":"Using the standard format"}
+$("#ntpl").oninput=function(){D.ntpl=this.value;save();render();ntUI()};
+$("#ntsave").onclick=function(){var v=$("#ntpl").value;try{localStorage.setItem(NTK,v);D.ntpl="";save();ntUI();say("Saved. Future notices will use this format.")}catch(e){say("Saving is not available here.")}};
+$("#ntreset").onclick=function(){var had=!!ntSaved();if(!confirm(had?"Go back to the standard notice wording? Your saved format will be removed.":"Go back to the standard notice wording?"))return;try{localStorage.removeItem(NTK)}catch(e){}D.ntpl="";save();$("#ntpl").value=NT_STD;ntUI();render()};
+function renderNotice(){var d=D,vc=d.mode!=="phy",hy=d.mode==="hyb",com=d.k==="com",bd=com?ph(d.cn,"Committee name"):"Board of Directors",nf=nInfo(),
+ fyh=(d.fy||"").replace(/\s*[\u2013-]\s*/,"-"),vp=vphr(0),
+ ven=hy?"at "+vp+" and through Video Conferencing (VC) or Other Audio Visual Means (OAVM)":vc?"through Video Conferencing (VC) or Other Audio Visual Means (OAVM), the deemed venue being "+vp:"at "+vp,
+ u=/^https?:\/\//i.test(d.link||"")?d.link.trim():"",AL=annexList(),
+ T={MEETING_KIND:com?"COMMITTEE MEETING":"BOARD MEETING",ADDRESSEE:com?"Members of the "+bd:"Board of Directors",COMPANY:ph(d.co,"Company"),REG_ADDRESS:ph(d.addr,"address"),
+  BODY:bd,MEETING_WORD:ph(nf.w,"First / Second / Third"),MEETING_NO:ph(nf.n,"00"),FY:ph(d.fy,"financial year"),FY_SHORT:ph(fyh,"financial year"),
+  DATE:ph(fd(d.date),"Day, Month DD, YYYY"),TIME:ph(ft2(d.start),"H:MM A.M. / P.M."),VENUE:ven,EMAIL:ph(d.email,"email"),ADVANCE:ph(d.adv,"two working days"),
+  LINK:u?"<a href=\""+esc(u)+"\">Meeting Link \u2013 Join the Meeting Now</a>":(d.link?esc(d.link):"<mark>[Meeting Link \u2013 Join the Meeting Now]</mark>"),
+  MEMBERS:com?"Members":"Directors",MEMBER:com?"Member":"Director",CHAIR:ph(d.chair,"Chairperson"),
+  SHORT_SUFFIX:d.short?", convened at shorter notice":"",SHORT_AT:d.short?" at shorter notice":"",
+  ANNEXURES:AL.length?AL.map(function(x,i){return(i+1)+". "+mk(x)}).join("\n"):"<mark>[Annexure 1 \u2013 Draft Minutes of previous Board Meeting]</mark>"},h="";
+ ntpl().split(/\n\s*\n/).forEach(function(p){p=p.trim();if(!p)return;var cl="",ok=true,m;
+  while((m=p.match(/^(CENTER|LEFT|VC|NOT VC|SHORT|NOT SHORT)\s*:\s*/i))){var f=m[1].toUpperCase();p=p.slice(m[0].length);
+   if(f==="CENTER")cl="ct";else if(f==="LEFT")cl="l";else if(f==="VC")ok=ok&&vc;else if(f==="NOT VC")ok=ok&&!vc;else if(f==="SHORT")ok=ok&&d.short;else ok=ok&&!d.short}
+  if(!ok)return;if(p==="{SIGNATURE}"){h+=sigHtml();return}
+  var x=mk(p).replace(/\*\*([\s\S]+?)\*\*/g,"<b>$1</b>").replace(/\*([^*\n]+?)\*/g,"<i>$1</i>").replace(/\{([A-Z_]+)\}/g,function(a,k){return T[k]!=null?T[k]:a});
+  h+="<p"+(cl?" class='"+cl+"'":"")+">"+x+"</p>"});
+ return lhTop()+h+"<p class='pb'></p>"+indexHtml()+"<p class='pb'></p>"+agendaHtml()+lhBot()}
+function atab(title,txt){var L=lines(txt);if(!L.length)return"";var v=D.mode==="vc";
+ return"<p class='t'>"+title+"</p><table class='g' data-w='700,2900,3000,2426'><tr><th>Sr. No.</th><th>Name</th><th>Designation</th><th>Signature</th></tr>"+L.map(function(l,i){var p=l.split("|").map(function(x){return x.trim()});return"<tr><td>"+(i+1)+"</td><td>"+esc(p[0])+"</td><td>"+esc(p[3]||p[1]||"")+"</td><td>"+(v?"Attended through VC":"")+"</td></tr>"}).join("")+"</table>"}
+function renderAtt(){var d=D,m=(d.no||"").match(/\d+/),title=(d.k==="com"?(d.cn||"[COMMITTEE]").toUpperCase()+" MEETING":"BOARD MEETING")+" NO. "+(m?m[0]:"[NO.]")+" / "+(d.fy||"[FY]"),
+ mode=d.mode==="vc"?"VIDEO CONFERENCING / OTHER AUDIO-VISUAL MEANS":d.mode==="hyb"?"PHYSICAL AND VIDEO CONFERENCING / OTHER AUDIO-VISUAL MEANS":"PHYSICAL",
+ rows=[["DAY &amp; DATE",ph(fd(d.date).toUpperCase(),"DATE")],["TIME",ph(ft(d.start),"TIME")],["VENUE",attVen()],["MODE",mode],["TIME OF COMMENCEMENT OF MEETING",ph(ft(d.start),"TIME")]];
+ return"<p class='ct'>ATTENDANCE REGISTER</p><p class='ct'>"+mk(title)+"</p><table class='g' data-w='3771,264,4981'>"+rows.map(function(r){return"<tr><td><b>"+r[0]+"</b></td><td><b>:</b></td><td><b>"+r[1]+"</b></td></tr>"}).join("")+"</table>"+
+ (atab("DIRECTOR PRESENT",d.dir)||"<p class='t'>DIRECTOR PRESENT</p><p><mark>[add directors present]</mark></p>")+atab("IN ATTENDANCE",d.att)+atab("INVITEES PRESENT",d.inv)+
+ "<p class='t'>Time of Conclusion of Meeting: "+ph(ft(d.end),"TIME")+"</p><p class='t'>Authenticated By:</p><p class='sp'></p><p class='t l'>"+(function(){var s=signer(d.asn,d.asd,"");return ph(s.n,"NAME")+"<br>"+(s.d?esc(s.d):"<mark>[Designation]</mark>")})()+"</p>"}
+var TABS=[["not","Notice with agenda"],["agd","Agenda only"],["min","Minutes"],["att","Attendance register"],["ctc","CTC of resolutions"]];
+function tabs(){var b=$("#docs");if(!b.children.length){TABS.forEach(function(t){var x=document.createElement("button");x.textContent=t[1];x.dataset.d=t[0];x.onclick=function(){D.doc=t[0];save();render()};b.appendChild(x)});}
+ Array.prototype.forEach.call(b.querySelectorAll("button"),function(x){x.className=x.dataset.d===(D.doc||"min")?"on":""});
+ var cb=$("#ctcb"),RL=resList(),on=(D.doc==="ctc"&&RL.length>0);cb.style.display=on?"":"none";
+ if(on){cb.innerHTML="<b>Include:</b>"+RL.map(function(x,i){return"<label class='ck'><input type='checkbox' data-i='"+i+"'"+(x.it.noctc?"":" checked")+"> Res. "+x.n+" – "+esc((x.it.t||"Untitled").slice(0,48))+"</label>"}).join("")+"<button data-all='1'>All</button><button data-all='0'>None</button>";
+  cb.querySelectorAll("input").forEach(function(c){c.onchange=function(){setNo(RL[+c.dataset.i].it,!c.checked);save();render()}});
+  cb.querySelectorAll("button").forEach(function(bt){bt.onclick=function(){RL.forEach(function(x){setNo(x.it,bt.dataset.all==="0")});save();render()}})}
+ var z=zipMode();$("#dl").textContent=z?"Download Word + annexures (ZIP)":"Download Word file";$("#dlw").style.display=z?"":"none";
+}
+function render(){var doc=D.doc||"min",h;
+ if(gm()&&doc!=="min"&&doc!=="ctc")h="<p>Notice, agenda and attendance register are available for Board and committee meetings. For an EGM or AGM, use Minutes or CTC of resolutions.</p>";
+ else h=doc==="not"?renderNotice():doc==="agd"?lhTop()+indexHtml()+"<p class='pb'></p>"+agendaHtml()+lhBot():doc==="att"?lhTop()+renderAtt()+lhBot():doc==="ctc"?lhTop()+renderCTC()+lhBot():renderMin();
+ var s=$("#sheet");s.innerHTML=h;s.className="sheet"+(doc==="att"?" att":"");estPages();chk();tabs();refreshFx();lhSync();dlists()}
+/* ---- venue ---- */
+function VN(){var o=D.vt==="oth";return{d:o?(D.vd||"").trim():"the Registered Office of the Company",a:((o?D.va:D.addr)||"").trim().replace(/\s*,?\s*\n\s*/g,", "),o:o}}
+function vphr(up){var v=VN();if(up)return(v.d?esc(v.d.toUpperCase())+" LOCATED AT ":"")+ph(v.a.toUpperCase(),"VENUE ADDRESS");return(v.d?esc(v.d)+" situate at ":"")+ph(v.a,"venue address")}
+function attVen(){var v=VN(),t=(v.d?esc(v.d.replace(/^the\s+/i,"").toUpperCase())+", ":"")+ph(v.a.toUpperCase(),"VENUE ADDRESS");return D.mode==="vc"?"DEEMED VENUE – "+t:t}
+/* ---- annexure files (kept on this device) ---- */
+var MEM={},DBP=null;
+function idb(){if(!DBP)DBP=new Promise(function(res){try{var q=indexedDB.open("minutes-annex",1);q.onupgradeneeded=function(){q.result.createObjectStore("f")};q.onsuccess=function(){res(q.result)};q.onerror=function(){res(null)}}catch(e){res(null)}});return DBP}
+function tx(mode,fn){return idb().then(function(db){if(!db)return null;return new Promise(function(r){try{var t=db.transaction("f",mode),st=t.objectStore("f"),q=fn(st);t.oncomplete=function(){r(q&&q.result!==undefined?q.result:null)};t.onerror=t.onabort=function(){r(null)}}catch(e){r(null)}})})}
+function fput(id,b){MEM[id]=b;return tx("readwrite",function(s){return s.put(b,id)})}
+function fget(id){if(MEM[id])return Promise.resolve(MEM[id]);return tx("readonly",function(s){return s.get(id)})}
+function fdel(id){delete MEM[id];return tx("readwrite",function(s){return s.delete(id)})}
+function fclear(ids){(ids||[]).forEach(function(id){fdel(id)})}
+function kb(n){return n>1048576?(n/1048576).toFixed(1)+" MB":Math.max(1,Math.round(n/1024))+" KB"}
+function annexList(){var L=lines(D.annex),m=L.length;return L.concat((D.ax||[]).map(function(a,i){return"Annexure "+(m+i+1)+" – "+(a.title||a.name)}))}
+function axUI(){var box=$("#axl"),m=lines(D.annex).length;if(!D.ax)D.ax=[];box.innerHTML="";
+ D.ax.forEach(function(a,i){var e=document.createElement("div");e.className="item";
+  e.innerHTML="<label>Annexure "+(m+i+1)+" title</label><input data-x='t'><p class='hint'>"+esc(a.name)+" · "+kb(a.size||0)+"</p><div class='bar'><button data-a='up'>Up</button><button data-a='dn'>Down</button><button data-a='rm'>Remove</button></div>";
+  var inp=e.querySelector("input");inp.value=a.title||"";inp.oninput=function(){a.title=inp.value;save();render()};
+  e.querySelectorAll("button").forEach(function(b){b.onclick=function(){var x=b.dataset.a;if(x==="rm"){fdel(a.id);D.ax.splice(i,1)}else{var j=x==="up"?i-1:i+1;if(j<0||j>=D.ax.length)return;var t=D.ax[i];D.ax[i]=D.ax[j];D.ax[j]=t}save();axUI();render()}});box.appendChild(e)})}
+$("#axf").onchange=function(){var F=Array.prototype.slice.call(this.files||[]);this.value="";if(!F.length)return;if(!D.ax)D.ax=[];
+ Promise.all(F.map(function(f){var id="ax"+Date.now().toString(36)+Math.random().toString(36).slice(2,8);D.ax.push({id:id,name:f.name,title:f.name.replace(/\.[^.]+$/,""),size:f.size});return fput(id,f)}))
+ .then(function(){save();axUI();render();say(F.length+" annexure"+(F.length>1?"s":"")+" added.")})};
+/* ---- certified true copy ---- */
+function fys(){var m=(D.fy||"").match(/(\d{4})\D+(\d{2,4})/);return m?m[1]+"-"+m[2].slice(-2):""}
+function abbr(){if((D.ref||"").trim())return D.ref.trim().toUpperCase();if(D.k==="board")return"BM";if(D.k==="egm")return"EGM";if(D.k==="agm")return"AGM";
+ var w=(D.cn||"").split(/\s+/).filter(function(x){return x&&!/^(and|&|of|the)$/i.test(x)});return w.length?w.map(function(x){return x[0].toUpperCase()}).join(""):"COM"}
+function ctcPre(){var S=resList().filter(function(x){return!x.it.noctc});return S.length===1?"CTC of Resolution No. "+S[0].n+" of":"CTC of"}
+function setNo(it,v){if(it.fk){var o=D.fx[it.fk]=D.fx[it.fk]||{};o.noctc=v}else it.noctc=v}
+function resList(){var R=[],n=0;allItems().forEach(function(it){if(it.r&&it.r.trim()){n++;R.push({n:n,it:it})}});return R}
+function renderCTC(){var d=D,g=gm(),vc=d.mode!=="phy",hy=d.mode==="hyb",R=resList();
+ if(!R.length)return"<p>No resolutions yet. Fill the Resolution box in an agenda item and its certified true copy will appear here.</p>";
+ R=R.filter(function(x){return!x.it.noctc});if(!R.length)return"<p>No resolution selected. Tick at least one resolution above the preview.</p>";
+ var nf=nInfo(),ref=esc(abbr())+"-"+(nf.n?nf.n:"<mark>[00]</mark>")+"/"+(fys()?fys():"<mark>[FY]</mark>"),CO=ph((d.co||"").toUpperCase(),"COMPANY"),
+  who=d.k==="board"?"THE BOARD OF DIRECTORS OF "+CO+" AT ITS MEETING":d.k==="com"?"THE "+ph((d.cn||"").toUpperCase(),"COMMITTEE")+" OF THE BOARD OF DIRECTORS OF "+CO+" AT ITS MEETING":"THE MEMBERS OF "+CO+" AT THE "+ph((d.no||"").toUpperCase(),"NO.")+" "+(d.k==="agm"?"ANNUAL GENERAL MEETING":"EXTRA ORDINARY GENERAL MEETING"),
+  VCt="VIDEO CONFERENCING (“VC”) / OTHER AUDIO – VISUAL MEANS (“OAVM”)",
+  ven=hy?" AT "+vphr(1)+" AND THROUGH "+VCt:vc?" THROUGH "+VCt:" AT "+vphr(1),h="";
+ R.forEach(function(x,i){var it=x.it,hd="CERTIFIED TRUE COPY OF THE "+(g?(it.sp||"Ordinary").toUpperCase()+" ":"")+"RESOLUTION PASSED BY "+who+" HELD ON "+ph(fd(d.date).toUpperCase(),"DATE")+", COMMENCED AT "+ph(ft(d.start),"TIME")+" AND CONCLUDED AT "+ph(ft(d.end),"TIME")+ven+".";
+  h+=(i?"<p class='pb'></p>":"")+"<p class='ru'>Resolution No. "+x.n+"/"+ref+"</p><p class='h'>"+hd+"</p><p class='t'>"+mk((it.t||"Untitled item").toUpperCase())+"</p>"+res(it.r)+
+  "<p class='ct'>//CERTIFIED TRUE COPY//</p><p class='t l'>FOR AND ON BEHALF OF "+CO+"</p><p class='sp'></p><p class='sp'></p><p class='l'><b>"+ph((d.csn||"").toUpperCase(),"NAME")+"<br>COMPANY SECRETARY<br>"+ph((d.acs||"").toUpperCase(),"ACS NO.")+"</b></p>"});
+ return h}
+/* ---- compulsory items ---- */
+function fdl(v){if(!v)return"";var p=v.split("-");return new Date(+p[0],+p[1]-1,+p[2]).toLocaleDateString("en-US",{month:"long",day:"numeric",year:"numeric"})}
+function jn(a){return a.length<2?(a[0]||""):a.slice(0,-1).join(", ")+" and "+a[a.length-1]}
+function FX(){var d=D,com=d.k==="com",B=com?"Committee":"Board",M=com?"Members":"Directors",vc=d.mode!=="phy",
+ bn=com?((d.cn||"").trim()||"[Name of Committee]"):"Board of Directors of the Company",ch=(d.chair||"").trim()||"[Chairperson]",
+ lo=names(d.loa),lj=jn(lo),pno=(d.prevNo||"").trim()||"[previous]",pdt=d.prevDate?fdl(d.prevDate):"[date]",ci=lines(d.circ),cb=ci.map(function(x){return"• "+x}).join("\n");
+ return[
+ {k:"chair",t:"To elect the Chairperson of the meeting",
+  n:ch+" shall assume the chair & convene the meeting. In his/her absence, the "+B+" is requested to appoint a Chairperson amongst themselves for convening the meeting.",
+  mn:ch+" was unanimously elected as the Chairperson for the Meeting."},
+ {k:"quorum",t:"To take roll call and ascertain the quorum of the meeting",
+  n:"The Chairperson shall ascertain that the requisite quorum is present at the meeting and call the meeting to order."+(vc?"\n\nAs per the Companies (Meetings of Board and its Powers) Rules, 2014 issued by the Ministry of Corporate Affairs read with the Secretarial Standard on Meetings of the Board of Directors (SS-1) issued by the Institute of Company Secretaries of India (ICSI), a "+(com?"member":"director")+" can attend the meeting through video conferencing or any other audio-visual means. A roll call shall be taken by the Company Secretary at the commencement of the meeting, when every person participating through video conferencing or other audio-visual means shall state, for the record, the following:\n(a) his or her name;\n(b) the location from where he/she is participating;\n(c) that he/she has received the agenda and all the relevant material for the meeting;\n(d) that no one other than the concerned "+(com?"member":"director")+" is attending or having access to the proceedings of the meeting at the location mentioned in clause (b).":""),
+  mn:(d.short?"The "+B+" noted that the present meeting has been convened at shorter notice in accordance with Section 173(3) of the Companies Act, 2013 read with Secretarial Standard-1, and the requisite consent of all "+M+" to hold this meeting has been duly obtained.":"The "+B+" noted that the notice and agenda of the meeting were circulated in accordance with Section 173(3) of the Companies Act, 2013 read with Secretarial Standard-1.")+(vc?" A roll call of the "+M+" and Invitees participating through video conferencing was conducted, and each "+(com?"Member":"Director")+" & Invitee confirmed their attendance.":"")+" Upon verifying the presence of the requisite quorum, the meeting was declared in order and the proceedings commenced."+
+  (vc?"\n\nIn compliance with the procedure prescribed under Section 173(2) of the Companies Act, 2013, read with Rule 3 of the Companies (Meetings of Board and its Powers) Rules, 2014, the Company Secretary informed the "+B+" that the meeting was being conducted through Video Conferencing (VC) / Other Audio-Visual Means (OAVM) in accordance with the applicable provisions.\n\nThe Company Secretary confirmed that all the "+M+" participating in the meeting had joined through VC/OAVM. The "+M+" so participating recorded their presence by stating:\na) Their name;\nb) The location from where they were attending the meeting;\nc) That they had received the agenda and all relevant materials for the meeting in advance; and\nd) That no person, other than themselves, was present or had access to the proceedings at their respective locations.":"")},
+ {k:"loa",t:"Record of attendance and grant of leave of absence, if any",
+  n:(lo.length?"Request for leave of absence has been received from "+lj+". ":"")+"The "+B+" shall grant leave of absence to the "+M+" who have sought the same. Pursuant to Section 167(1)(b) of the Companies Act, 2013, the Board may grant leave of absence to a Director who is not present, if any. Requests for grant of leave of absence, if any, received will be tabled at the Meeting."+(com?"":"\n\nThe Board is requested to note that as per Section 167(1)(b) of the Companies Act, 2013, the office of a Director shall become vacant in case he/she absents himself/herself from all the meetings of the Board of Directors held during a period of twelve months, with or without seeking leave of absence of the Board."),
+  mn:lo.length?"The record of attendance of the "+M+" was taken. The "+B+" noted that "+lj+" had requested leave of absence from attending this meeting. Upon consideration, the "+B+" granted leave of absence to "+lj+".":"The record of attendance of the "+M+" was taken. As all the "+(com?"Committee Members":"Board Members")+" were present, no leave of absence was required to be granted."},
+ {k:"prev",ax:"Annexure 1",t:"To take note of the minutes of the previous meeting of the "+bn,
+  n:"The Minutes of the "+pno+" Meeting of the "+bn+" held on "+pdt+" (Annexure 1) will be placed before the meeting for noting by the "+B+" and signature of the Chairperson.",
+  mn:"The Minutes of the "+pno+" Meeting of the "+bn+" held on "+pdt+" were placed before the "+B+". The "+B+" took note of the same and the minutes were signed by the Chairperson as a correct record of the proceedings."},
+ {k:"circ",t:"To take note of the resolutions passed by circulation",
+  n:ci.length?"The "+B+" is requested to take note of the resolution(s) passed by circulation pursuant to Section 175 of the Companies Act, 2013. The said resolution(s), having already been approved, are placed before the "+B+" for noting.\n\nThe following resolution(s) passed by way of circulation may be taken on record:\n"+cb:"No resolution has been passed by circulation since the last meeting of the "+B+". The "+B+" is requested to take note of the same.",
+  mn:ci.length?"The "+B+" took note of the resolutions passed by circulation since the last meeting, pursuant to Section 175 of the Companies Act, 2013 and the Articles of Association of the Company. The details of such resolutions were placed before the "+B+" for perusal and record.\n\nFollowing resolutions passed by way of circulation were taken on record:\n"+cb:"The "+B+" noted that no resolution was passed by circulation since the last meeting."},
+ {k:"aob",t:"Any other matter with the permission of the "+(com?"Committee":"Board"),
+  n:"The "+B+" may discuss any matter not specified in the above agenda with the permission of the Chairperson and with the consent of the majority of the "+M+" present at the meeting.",
+  mn:"No other matter was taken up for discussion."}]}
+function allItems(){if(gm())return D.items;if(!D.fx)D.fx={};var F=FX();
+ function m(a){var o=D.fx[a.k]||{};return{fk:a.k,t:o.t!=null?o.t:a.t,n:o.n!=null?o.n:a.n,mn:o.mn!=null?o.mn:a.mn,r:o.r!=null?o.r:"",ax:o.ax!=null?o.ax:(a.ax||""),noctc:!!o.noctc}}
+ return F.slice(0,5).map(m).concat(D.items,[m(F[5])])}
+/* ---- attendance tabs ---- */
+var PT="dir",PR=[];
+function pdefs(){var g=gm();return[["dir","Directors present"],["att",g?"Invitees present":"In attendance"],["inv",g?"Special invitees":"Invitees"],g?["aud","Auditor"]:["loa","Leave of absence"]]}
+var PF={full:[["Name","Dr. Soumyaroop Dash"],["Role in the meeting","Chairperson of the Meeting"],["Place (attending from)","Mumbai"],["Designation","Managing Director"]],loa:[["Name","Mr. ______"],["Designation","Independent Director"]],aud:[["Name","M/s. ______"],["Role","Statutory Auditor"]]};
+function pf(){return PT==="loa"?PF.loa:PT==="aud"?PF.aud:PF.full}
+function tabLbl(t){var c=lines(D[t[0]]).length;return t[1]+(c?" ("+c+")":"")}
+function peopleUI(){var T=pdefs(),b=$("#ptabs");if(!T.some(function(t){return t[0]===PT}))PT="dir";b.innerHTML="";
+ T.forEach(function(t){var x=document.createElement("button");x.textContent=tabLbl(t);x.dataset.p=t[0];x.className=t[0]===PT?"on":"";x.onclick=function(){PT=t[0];peopleUI()};b.appendChild(x)});
+ PR=lines(D[PT]).map(function(l){return l.split("|").map(function(x){return x.trim()})});if(!PR.length)PR=[[]];plist()}
+function pser(){var F=pf();D[PT]=PR.map(function(r){var a=F.map(function(_,i){return(r[i]||"").trim()});while(a.length&&!a[a.length-1])a.pop();return a.join(" | ")}).filter(function(x){return x.replace(/[|\s]/g,"")}).join("\n");save();render();
+ var on=$("#ptabs button.on");if(on)on.textContent=tabLbl(pdefs().filter(function(t){return t[0]===PT})[0])}
+function plist(){var box=$("#plist"),F=pf();box.innerHTML="";
+ PR.forEach(function(r,i){var e=document.createElement("div");e.className="item";
+  e.innerHTML="<div class='prow'>"+F.map(function(f,j){return"<div><label>"+f[0]+"</label><input data-j='"+j+"' placeholder='"+esc(f[1])+"'></div>"}).join("")+"</div><div class='bar'><button data-a='up'>Up</button><button data-a='dn'>Down</button><button data-a='rm'>Remove</button></div>";
+  e.querySelectorAll("input").forEach(function(inp){var j=+inp.dataset.j;inp.value=r[j]||"";inp.oninput=function(){r[j]=inp.value;pser()}});
+  e.querySelectorAll("button").forEach(function(bt){bt.onclick=function(){var a=bt.dataset.a;if(a==="rm"){PR.splice(i,1);if(!PR.length)PR=[[]]}else{var j=a==="up"?i-1:i+1;if(j<0||j>=PR.length)return;var t=PR[i];PR[i]=PR[j];PR[j]=t}pser();plist()}});box.appendChild(e)});
+ $("#phint").textContent=PT==="loa"?"Names here flow into the leave of absence item of the agenda and minutes.":PT==="aud"?"":"Place is shown as “Present through VC from …” in VC minutes. Designation is used in the attendance register."}
+$("#padd").onclick=function(){PR.push([]);plist();var x=$("#plist").lastElementChild;if(x)x.querySelector("input").focus()};
+/* ---- index page estimate ---- */
+function estPages(){var s=$("#sheet"),P=s.querySelectorAll("[data-pr]");if(!P.length)return;var cs=getComputedStyle(s),w=s.clientWidth-parseFloat(cs.paddingLeft)-parseFloat(cs.paddingRight),PH=w*1.62,pg=1,cur=1,base=null,bm={};
+ Array.prototype.forEach.call(s.children,function(c){if(c.classList.contains("pb")){pg=cur+1;cur=pg;base=null;return}if(base==null)base=c.offsetTop;cur=pg+Math.floor((c.offsetTop-base)/PH);var k=c.getAttribute("data-bm");if(k)bm[k]=cur});
+ P.forEach(function(x){x.textContent=bm[x.dataset.pr]||""})}
+/* ---- name lists ---- */
+function dlists(){var N=[];["dir","att","inv"].forEach(function(k){names(D[k]).forEach(function(n){if(N.indexOf(n)<0)N.push(n)})});if(D.csn&&N.indexOf(D.csn)<0)N.push(D.csn);
+ var a=N.map(function(n){return"<option value=\""+esc(n)+"\">"}).join("");if($("#pnames").innerHTML!==a)$("#pnames").innerHTML=a;
+ var m=lines(D.annex).length+(D.ax||[]).length,b="";for(var i=1;i<=Math.max(m,1);i++)b+="<option value='Annexure "+i+"'>";if($("#axnames").innerHTML!==b)$("#axnames").innerHTML=b}
+function desigOf(n){var r="";["dir","att","inv"].forEach(function(k){lines(D[k]).forEach(function(l){var p=l.split("|").map(function(x){return x.trim()});if(!r&&core(p[0])===core(n))r=p[3]||p[1]||""})});return r}
+[["nsn","nsd"],["asn","asd"]].forEach(function(q){$("#"+q[0]).addEventListener("change",function(){var v=this.value.trim();if(!v||D[q[1]])return;var g=v===D.csn?"Company Secretary":desigOf(v);if(g){D[q[1]]=g;$("#"+q[1]).value=g;save();render()}})});
+/* ---- letterhead ---- */
+var LHK="minutes-letterhead-v1",LHC={sig:null,head:null,foot:null,note:""};
+function lhAll(){try{return JSON.parse(localStorage.getItem(LHK)||"{}")}catch(e){return{}}}
+function lhKey(){return"lh:"+(D.co||"").trim().toLowerCase()}
+function lhMeta(){return lhAll()[lhKey()]||null}
+function lhPut(m){var a=lhAll();if(m){m.v=Date.now();a[lhKey()]=m}else delete a[lhKey()];try{localStorage.setItem(LHK,JSON.stringify(a))}catch(e){say("Saving is not available here.")}LHC.sig=null;lhUI();render()}
+function lhOn(doc){var m=lhMeta();return!!m&&doc!=="min"&&!(m.use&&m.use[doc]===false)}
+function lhTop(){var doc=curDoc();if(!lhOn(doc))return"";if(LHC.head)return"<img class='lh' alt='' src='"+LHC.head+"'>";return LHC.note?"<p class='lhn'>"+esc(LHC.note)+"</p>":""}
+function lhBot(){return lhOn(curDoc())&&LHC.foot?"<img class='lhf' alt='' src='"+LHC.foot+"'>":""}
+function lhSync(){var m=lhMeta(),sig=m?lhKey()+":"+m.v:"none";if(sig===LHC.sig)return;LHC.sig=sig;
+ [LHC.head,LHC.foot].forEach(function(u){if(u)URL.revokeObjectURL(u)});LHC.head=LHC.foot=null;LHC.note="";lhUI();if(!m){render();return}
+ var k=lhKey();Promise.all([fget(k+(m.kind==="img"?":head":":phead")),fget(k+(m.kind==="img"?":foot":":pfoot"))]).then(function(r){if(LHC.sig!==sig)return;
+  if(r[0])LHC.head=URL.createObjectURL(r[0]);if(r[1])LHC.foot=URL.createObjectURL(r[1]);
+  if(m.kind==="docx"&&!r[0])LHC.note="Letterhead from \u201c"+m.name+"\u201d is applied in the downloaded Word file.";render()})}
+function lhUI(){var m=lhMeta(),co=(D.co||"").trim()||"this company";
+ $("#lhs").textContent=m?(m.kind==="docx"?"Word letterhead \u201c"+m.name+"\u201d saved for "+co+".":"Letterhead saved for "+co+": "+(m.hname?"header \u201c"+m.hname+"\u201d":"no header")+(m.fname?", footer \u201c"+m.fname+"\u201d":"")+"."):"No letterhead saved for "+co+".";
+ $("#lhx").style.display=m?"":"none";var U=$("#lhu");U.innerHTML="";if(!m)return;
+ [["not","Notice"],["agd","Agenda"],["ctc","CTC"],["att","Attendance register"]].forEach(function(t){var l=document.createElement("label");l.className="ck";l.style.margin="4px 0";l.innerHTML="<input type='checkbox'> Use on "+t[1];var c=l.querySelector("input");c.checked=!(m.use&&m.use[t[0]]===false);
+  c.onchange=function(){var a=lhAll(),x=a[lhKey()];if(!x)return;x.use=x.use||{};x.use[t[0]]=c.checked;try{localStorage.setItem(LHK,JSON.stringify(a))}catch(e){}render()};U.appendChild(l)})}
+function imgExt(f){return/png/i.test(f.type)||/\.png$/i.test(f.name)?"png":"jpeg"}
+function imgDims(f){return new Promise(function(res,rej){var u=URL.createObjectURL(f),i=new Image();i.onload=function(){res({w:i.naturalWidth,h:i.naturalHeight});URL.revokeObjectURL(u)};i.onerror=function(){rej();URL.revokeObjectURL(u)};i.src=u})}
+$("#lhf").onchange=function(){var f=this.files&&this.files[0];this.value="";if(!f)return;var k=lhKey();
+ if(/\.docx$/i.test(f.name)){if(!window.JSZip){say("Word letterheads need the page to be online.");return}
+  JSZip.loadAsync(f).then(parseLH).then(function(P){if(!P.refs.length){say("That Word file has no header or footer to use as a letterhead.");return}
+   return Promise.all([fput(k+":docx",f),P.ph?fput(k+":phead",P.ph):fdel(k+":phead"),P.pf?fput(k+":pfoot",P.pf):fdel(k+":pfoot")]).then(function(){var o=lhMeta()||{};lhPut({kind:"docx",name:f.name,use:o.use});say("Letterhead saved.")})})
+  .catch(function(){say("Could not read that Word file.")});return}
+ imgDims(f).then(function(d){return fput(k+":head",f).then(function(){var o=lhMeta()||{},img=o.kind==="img";lhPut({kind:"img",hname:f.name,hw:d.w,hh:d.h,hx:imgExt(f),fname:img?o.fname:"",fw:img?o.fw:0,fh:img?o.fh:0,fx:img?o.fx:"",use:o.use});say("Letterhead saved.")})}).catch(function(){say("That file is not a PNG or JPG image.")})};
+$("#lhff").onchange=function(){var f=this.files&&this.files[0];this.value="";if(!f)return;var k=lhKey();
+ imgDims(f).then(function(d){return fput(k+":foot",f).then(function(){var o=lhMeta()||{},img=o.kind==="img";lhPut({kind:"img",hname:img?o.hname:"",hw:img?o.hw:0,hh:img?o.hh:0,hx:img?o.hx:"",fname:f.name,fw:d.w,fh:d.h,fx:imgExt(f),use:o.use});say("Footer saved.")})}).catch(function(){say("That file is not a PNG or JPG image.")})};
+$("#lhx").onclick=function(){if(!confirm("Remove the letterhead for this company?"))return;var k=lhKey();["head","foot","docx","phead","pfoot"].forEach(function(x){fdel(k+":"+x)});lhPut(null)};
+/* read a Word letterhead: copy its header/footer parts */
+function relsOf(x){var R={},re=/<Relationship\b[^>]*>/g,m;while((m=re.exec(x||""))){var a=m[0],g=function(n){var q=a.match(new RegExp(n+'="([^"]*)"'));return q?q[1]:""};R[g("Id")]={t:g("Target"),ty:g("Type"),ext:g("TargetMode")==="External"}}return R}
+function wpath(t){t=t.replace(/^\//,"");return/^word\//.test(t)?t:"word/"+t.replace(/^\.\//,"")}
+function parseLH(z){var rd=function(p,ty){var f=z.file(p);return f?f.async(ty||"string"):Promise.resolve(null)};
+ return Promise.all([rd("word/document.xml"),rd("word/_rels/document.xml.rels"),rd("[Content_Types].xml")]).then(function(r){
+  var doc=r[0]||"",dr=relsOf(r[1]),ct=r[2]||"",i=doc.lastIndexOf("<w:sectPr"),sect=i>-1?doc.slice(i):"",refs=[],re=/<w:(header|footer)Reference\b[^>]*>/g,m;
+  while((m=re.exec(sect))){var ty=(m[0].match(/w:type="(\w+)"/)||[])[1]||"default",id=(m[0].match(/r:id="([^"]+)"/)||[])[1];if(id&&dr[id])refs.push({tag:m[1],type:ty,path:wpath(dr[id].t)})}
+  var P={kind:"docx",refs:refs,files:{},ct:"",rels:"",sect:"",pgMar:(sect.match(/<w:pgMar\b[^>]*\/>/)||[""])[0],titlePg:/<w:titlePg(\s*\/>|\s+w:val="(1|true|on)")/.test(sect),foot:refs.some(function(x){return x.tag==="footer"}),ph:null,pf:null};
+  (ct.match(/<Default\b[^>]*\/>/g)||[]).forEach(function(d){if(!/Extension="(rels|xml)"/i.test(d))P.ct+=d});
+  refs.sort(function(a,b){return a.tag===b.tag?0:a.tag==="header"?-1:1});
+  return Promise.all(refs.map(function(f,n){var base=f.path.split("/").pop(),nb="lh_"+n+"_"+base,rp="word/_rels/"+base+".rels";
+   return Promise.all([rd(f.path),rd(rp)]).then(function(q){var xml=q[0]||"",rx=q[1];
+    P.sect+='<w:'+f.tag+'Reference w:type="'+f.type+'" r:id="rIdLH'+n+'"/>';
+    P.rels+='<Relationship Id="rIdLH'+n+'" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/'+f.tag+'" Target="'+nb+'"/>';
+    P.ct+='<Override PartName="/word/'+nb+'" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.'+f.tag+'+xml"/>';
+    P.files["word/"+nb]=xml;if(!rx)return;var RR=relsOf(rx),jobs=[];
+    Object.keys(RR).forEach(function(id){var e=RR[id];if(e.ext)return;var src=wpath(e.t.replace(/^\.\.\//,"")),nm=src.split("/").pop(),dir=e.t.indexOf("/")>-1?e.t.replace(/[^\/]*$/,""):"",nt=dir+"lh"+n+"_"+nm;
+     rx=rx.split('Target="'+e.t+'"').join('Target="'+nt+'"');
+     jobs.push(rd(src,"uint8array").then(function(b){if(!b)return;P.files["word/"+nt.replace(/^\.\.\//,"")]=b;
+      if(/\/image$/.test(e.ty)&&/\.(png|jpe?g|gif)$/i.test(nm)){var bl=new Blob([b],{type:/png$/i.test(nm)?"image/png":/gif$/i.test(nm)?"image/gif":"image/jpeg"});if(f.tag==="header"&&!P.ph)P.ph=bl;if(f.tag==="footer"&&!P.pf)P.pf=bl}}))});
+    return Promise.all(jobs).then(function(){P.files["word/_rels/"+nb+".rels"]=rx})})})).then(function(){return P})})}
+function lhParts(){var doc=curDoc(),m=lhMeta();if(!m||!lhOn(doc))return Promise.resolve(null);var k=lhKey();
+ if(m.kind==="docx")return fget(k+":docx").then(function(b){return b&&window.JSZip?JSZip.loadAsync(b).then(parseLH):null}).catch(function(){return null});
+ return Promise.all([m.hname?fget(k+":head"):null,m.fname?fget(k+":foot"):null]).then(function(r){if(!r[0]&&!r[1])return null;
+  return Promise.all([r[0]?r[0].arrayBuffer():null,r[1]?r[1].arrayBuffer():null]).then(function(a){return{kind:"img",m:m,h:a[0]?new Uint8Array(a[0]):null,f:a[1]?new Uint8Array(a[1]):null}})})}
+function picXml(rid,cx,cy,y,id){return'<w:p><w:pPr><w:spacing w:after="0" w:line="240" w:lineRule="auto"/></w:pPr><w:r><w:drawing><wp:anchor distT="0" distB="0" distL="0" distR="0" simplePos="0" relativeHeight="'+(251658240+id)+'" behindDoc="1" locked="0" layoutInCell="1" allowOverlap="1"><wp:simplePos x="0" y="0"/><wp:positionH relativeFrom="page"><wp:posOffset>0</wp:posOffset></wp:positionH><wp:positionV relativeFrom="page"><wp:posOffset>'+y+'</wp:posOffset></wp:positionV><wp:extent cx="'+cx+'" cy="'+cy+'"/><wp:effectExtent l="0" t="0" r="0" b="0"/><wp:wrapNone/><wp:docPr id="'+(900+id)+'" name="Letterhead '+id+'"/><wp:cNvGraphicFramePr/><a:graphic xmlns:a="http://schemas.openxmlformats.org/drawingml/2006/main"><a:graphicData uri="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:pic xmlns:pic="http://schemas.openxmlformats.org/drawingml/2006/picture"><pic:nvPicPr><pic:cNvPr id="0" name="letterhead'+id+'"/><pic:cNvPicPr/></pic:nvPicPr><pic:blipFill><a:blip r:embed="'+rid+'"/><a:stretch><a:fillRect/></a:stretch></pic:blipFill><pic:spPr><a:xfrm><a:off x="0" y="0"/><a:ext cx="'+cx+'" cy="'+cy+'"/></a:xfrm><a:prstGeom prst="rect"><a:avLst/></a:prstGeom></pic:spPr></pic:pic></a:graphicData></a:graphic></wp:anchor></w:drawing></w:r></w:p>'}
+function imgParts(L,pageNo){var m=L.m,NSX='xmlns:w="http://schemas.openxmlformats.org/wordprocessingml/2006/main" xmlns:r="http://schemas.openxmlformats.org/officeDocument/2006/relationships" xmlns:wp="http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing"',
+ P={kind:"img",files:{},ct:'<Default Extension="png" ContentType="image/png"/><Default Extension="jpeg" ContentType="image/jpeg"/>',rels:"",sect:"",mt:0,mb:0,foot:false},cx=CFG.pw*635,RL='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><Relationships xmlns="http://schemas.openxmlformats.org/package/2006/relationships"><Relationship Id="rIdI" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/image" Target="media/';
+ if(L.h&&m.hw){var cy=Math.round(cx*m.hh/m.hw);P.files["word/media/lh_head."+m.hx]=L.h;P.files["word/lh_header.xml"]='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:hdr '+NSX+'>'+picXml("rIdI",cx,cy,0,1)+'</w:hdr>';
+  P.files["word/_rels/lh_header.xml.rels"]=RL+'lh_head.'+m.hx+'"/></Relationships>';P.sect+='<w:headerReference w:type="default" r:id="rIdLHH"/>';
+  P.rels+='<Relationship Id="rIdLHH" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/header" Target="lh_header.xml"/>';P.ct+='<Override PartName="/word/lh_header.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.header+xml"/>';P.mt=Math.round(cy/635)+300}
+ if(L.f&&m.fw){var fy=Math.round(cx*m.fh/m.fw),pn=pageNo?'<w:p><w:pPr><w:jc w:val="center"/></w:pPr>'+rr('<w:t xml:space="preserve">Page </w:t>',{})+rr('<w:fldChar w:fldCharType="begin"/>',{})+rr('<w:instrText xml:space="preserve"> PAGE </w:instrText>',{})+rr('<w:fldChar w:fldCharType="separate"/>',{})+rr('<w:t>1</w:t>',{})+rr('<w:fldChar w:fldCharType="end"/>',{})+'</w:p>':'';
+  P.files["word/media/lh_foot."+m.fx]=L.f;P.files["word/lh_footer.xml"]='<?xml version="1.0" encoding="UTF-8" standalone="yes"?><w:ftr '+NSX+'>'+picXml("rIdI",cx,fy,CFG.ph*635-fy,2)+pn+'</w:ftr>';
+  P.files["word/_rels/lh_footer.xml.rels"]=RL+'lh_foot.'+m.fx+'"/></Relationships>';P.sect+='<w:footerReference w:type="default" r:id="rIdLHF"/>';
+  P.rels+='<Relationship Id="rIdLHF" Type="http://schemas.openxmlformats.org/officeDocument/2006/relationships/footer" Target="lh_footer.xml"/>';P.ct+='<Override PartName="/word/lh_footer.xml" ContentType="application/vnd.openxmlformats-officedocument.wordprocessingml.footer+xml"/>';P.mb=Math.round(fy/635)+300;P.foot=true}
+ return P}
+sync();vis();items();axUI();peopleUI();ntUI();lhUI();render();
+</script></body></html>
